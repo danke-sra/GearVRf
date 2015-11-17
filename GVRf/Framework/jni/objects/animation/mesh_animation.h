@@ -12,10 +12,9 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-namespace gvr {
+#include "objects/vertex_bone_data.h"
 
-static const int MAX_BONES = 100;
-static const int BONES_PER_VERTEX = 4;
+namespace gvr {
 
 struct BoneInfo {
     glm::mat4 boneOffset;

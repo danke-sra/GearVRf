@@ -20,6 +20,7 @@
 #ifndef MESH_H_
 #define MESH_H_
 
+#include <algorithm>
 #include <map>
 #include <memory>
 #include <vector>
@@ -34,9 +35,13 @@
 #include "gl/gl_program.h"
 
 #include "objects/animation/mesh_animation.h"
+#include "util/gvr_gl.h"
+
+#include "objects/components/bone.h"
 #include "objects/hybrid_object.h"
 #include "objects/material.h"
 #include "objects/bounding_volume.h"
+#include "objects/vertex_bone_data.h"
 
 #include "engine/memory/gl_delete.h"
 
@@ -47,7 +52,8 @@ public:
             vertices_(), normals_(), tex_coords_(), indices_(), float_vectors_(), vec2_vectors_(), vec3_vectors_(), vec4_vectors_(),
                     have_bounding_volume_(false), vao_dirty_(true),
                     vaoID_(GVR_INVALID), triangle_vboID_(GVR_INVALID), vert_vboID_(GVR_INVALID),
-                    norm_vboID_(GVR_INVALID), tex_vboID_(GVR_INVALID), bon_vboID_(GVR_INVALID)
+                    norm_vboID_(GVR_INVALID), tex_vboID_(GVR_INVALID), bon_vboID_(GVR_INVALID),
+					boneVboID_(GVR_INVALID), vertexBoneData_(this), bone_data_dirty_(true)
     {
     }
 
@@ -84,6 +90,7 @@ public:
         have_bounding_volume_ = false;
         vao_dirty_ = true;
         vaoID_ = triangle_vboID_ = vert_vboID_ = norm_vboID_ = tex_vboID_ = bon_vboID_ = GVR_INVALID;
+        bone_data_dirty_ = true;
     }
 
     const std::vector<glm::vec3>& vertices() const {
@@ -229,6 +236,19 @@ public:
     // /////////////////////////////////////////////////
     //  code for vertex attribute location
 
+    void setBoneLoc(GLuint boneIndicesLoc, GLuint boneWeightsLoc) {
+        boneIndicesLoc_ = boneIndicesLoc;
+        boneWeightsLoc_ = boneWeightsLoc;
+    }
+
+    GLuint getBoneIndicesLoc() {
+        return boneIndicesLoc_;
+    }
+
+    GLuint getBoneWeightsLoc() {
+        return boneWeightsLoc_;
+    }
+
     void setVertexAttribLocF(GLuint location, std::string key) {
         attribute_float_keys_[location] = key;
         vao_dirty_ = true;
@@ -272,6 +292,21 @@ public:
 
     void animate(float timeInSecs);
 
+    bool hasBones() const {
+        return vertexBoneData_.getNumBones();
+    }
+
+    void setBones(std::vector<Bone*>&& bones) {
+        vertexBoneData_.setBones(std::move(bones));
+        bone_data_dirty_ = true;
+    }
+
+    VertexBoneData &getVertexBoneData() {
+        return vertexBoneData_;
+    }
+
+    void generateBoneArrayBuffers();
+
 private:
     Mesh(const Mesh& mesh);
     Mesh(Mesh&& mesh);
@@ -309,6 +344,14 @@ private:
     bool have_bounding_volume_;
     BoundingVolume bounding_volume;
     MeshAnimation mesh_animation;
+
+    // Bone data for the shader
+    VertexBoneData vertexBoneData_;
+    GLuint boneIndicesLoc_;
+    GLuint boneWeightsLoc_;
+
+    GLuint boneVboID_;
+    bool bone_data_dirty_;
 };
 }
 #endif
