@@ -295,6 +295,10 @@ public class GVRMesh extends GVRHybridObject {
                 NativeMesh.getBoundingBox(getNative()));
     }
 
+    public void animate(float timeInSeconds) {
+        NativeMesh.animate(getNative(), timeInSeconds);
+    }
+
     private void checkValidFloatVector(String keyName, String key,
             String vectorName, float[] vector, int expectedComponents) {
         checkStringNotNullOrEmpty(keyName, key);
@@ -362,4 +366,6 @@ class NativeMesh {
     static native void setVec4Vector(long mesh, String key, float[] vec4Vector);
 
     static native long getBoundingBox(long mesh);
+
+    static native void animate(long mesh, float timeInSeconds);
 }

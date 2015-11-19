@@ -236,6 +236,23 @@ void Mesh::generateVAO() {
         glVertexAttribPointer(texCoordLoc, 2, GL_FLOAT, 0, 0, 0);
     }
 
+    if (mesh_animation.hasBones()) {
+        glGenBuffers(1, &bon_vboID_);
+        glBindBuffer(GL_ARRAY_BUFFER, bon_vboID_);
+        glBufferData(GL_ARRAY_BUFFER,
+                sizeof(mesh_animation.getBones()[0]) * mesh_animation.getBones().size(),
+                &mesh_animation.getBones()[0], GL_STATIC_DRAW);
+
+        GLuint boneIdLoc = GLProgram::BONE_ID_ATTRIBUTE_LOCATION;
+        glEnableVertexAttribArray(boneIdLoc);
+        glVertexAttribIPointer(boneIdLoc, 4, GL_INT, sizeof(BoneData), (const GLvoid*) 0);
+
+        GLuint boneWeightLoc = GLProgram::BONE_WEIGHT_ATTRIBUTE_LOCATION;
+        glEnableVertexAttribArray(boneWeightLoc);
+        glVertexAttribPointer(boneWeightLoc, 4, GL_FLOAT, GL_FALSE, sizeof(BoneData),
+                (const GLvoid*) (4 * sizeof(GLfloat)));
+    }
+
     for (auto it = attribute_float_keys_.begin();
             it != attribute_float_keys_.end(); ++it) {
         glGenBuffers(1, &tmpID);
@@ -287,6 +304,10 @@ void Mesh::generateVAO() {
 
     vao_dirty_ = false;
 #endif
+}
+
+void Mesh::animate(float timeInSecs) {
+    mesh_animation.update(timeInSecs);
 }
 
 }

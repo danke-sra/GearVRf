@@ -94,6 +94,10 @@ Java_org_gearvrf_NativeMesh_setVec4Vector(JNIEnv * env,
 JNIEXPORT jlong JNICALL
 Java_org_gearvrf_NativeMesh_getBoundingBox(JNIEnv * env,
         jobject obj, jlong jmesh);
+
+JNIEXPORT void JNICALL
+Java_org_gearvrf_NativeMesh_animate(JNIEnv * env,
+        jobject obj, jlong jmesh, jfloat timeInSeconds);
 }
 ;
 
@@ -378,6 +382,16 @@ Java_org_gearvrf_NativeMesh_getBoundingBox(JNIEnv * env,
         jobject obj, jlong jmesh) {
     Mesh* mesh = reinterpret_cast<Mesh*>(jmesh);
     return reinterpret_cast<jlong>(mesh->getBoundingBox());
+}
+
+JNIEXPORT void JNICALL
+Java_org_gearvrf_NativeMesh_animate(JNIEnv * env,
+        jobject obj, jlong jmesh, jfloat jTimeInSeconds) {
+    Mesh* mesh = reinterpret_cast<Mesh*>(jmesh);
+
+    float timeInSeconds = jTimeInSeconds;
+
+    mesh->animate(timeInSeconds);
 }
 
 }

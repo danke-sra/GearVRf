@@ -141,7 +141,9 @@ public:
     enum attributeBindLocation {
         POSITION_ATTRIBUTE_LOCATION = 0,
         TEXCOORD_ATTRIBUT_LOCATION = 1,
-        NORMAL_ATTRIBUTE_LOCATION = 2
+        NORMAL_ATTRIBUTE_LOCATION = 2,
+        BONE_ID_ATTRIBUTE_LOCATION = 3,
+        BONE_WEIGHT_ATTRIBUTE_LOCATION = 4
     };
 
 private:
@@ -149,9 +151,11 @@ private:
 
     static void bindCommonAttributes(GLuint id)
     {
-    	glBindAttribLocation (id, POSITION_ATTRIBUTE_LOCATION, "a_position");
-    	glBindAttribLocation (id, TEXCOORD_ATTRIBUT_LOCATION, "a_tex_coord");
-    	glBindAttribLocation (id, NORMAL_ATTRIBUTE_LOCATION, "a_normal");
+        glBindAttribLocation(id, POSITION_ATTRIBUTE_LOCATION, "a_position");
+        glBindAttribLocation(id, TEXCOORD_ATTRIBUT_LOCATION, "a_tex_coord");
+        glBindAttribLocation(id, NORMAL_ATTRIBUTE_LOCATION, "a_normal");
+        glBindAttribLocation(id, BONE_ID_ATTRIBUTE_LOCATION, "a_bone_id");
+        glBindAttribLocation(id, BONE_WEIGHT_ATTRIBUTE_LOCATION, "a_bone_weight");
     }
 
 };
