@@ -19,7 +19,10 @@
 
 #include "assimp_importer.h"
 
+#include <glm/gtc/type_ptr.hpp>
+
 #include "objects/mesh.h"
+#include "objects/animation/mesh_animation.h"
 
 namespace gvr {
 Mesh* AssimpImporter::getMesh(int index) {
@@ -60,6 +63,22 @@ Mesh* AssimpImporter::getMesh(int index) {
         }
         mesh->set_tex_coords(std::move(tex_coords));
     }
+
+    // TODO: Change this to a better approach of getting the aiScene
+    MeshAnimation meshAnimation;
+    meshAnimation.setScene(assimp_importer_->GetScene());
+
+    glm::mat4 globalInverseMatrix =
+            glm::make_mat4(&(assimp_importer_->GetScene()->mRootNode->mTransformation.a1));
+    meshAnimation.setGlobalInverTransform(globalInverseMatrix);
+    meshAnimation.resizeBonesVector(ai_mesh->mNumVertices);
+
+    // Load all bones information from the Assimp mesh
+    if (ai_mesh->HasBones()) {
+        meshAnimation.loadBones(ai_mesh);
+    }
+
+    mesh->setMeshAnimation(meshAnimation);
 
     std::vector<unsigned short> triangles;
     for (int i = 0; i < ai_mesh->mNumFaces; ++i) {
