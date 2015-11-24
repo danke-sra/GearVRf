@@ -595,6 +595,10 @@ void Renderer::renderRenderData(RenderData* render_data,
                                     mv_matrix, glm::inverseTranspose(mv_matrix),
                                     mvp_matrix, render_data, curr_material);
                             break;
+                        case Material::ShaderType::MESH_ANIMATION_SHADER:
+                            shader_manager->getMeshAnimationShader()->render(
+                                    mvp_matrix, render_data, curr_material);
+                            break;
                         default:
                             shader_manager->getCustomShader(
                                     curr_material->shader_type())->render(
