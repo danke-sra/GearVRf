@@ -45,6 +45,7 @@ public:
         TEXTURE_SHADER = 7,
         EXTERNAL_RENDERER_SHADER = 8,
         ASSIMP_SHADER = 9,
+        MESH_ANIMATION_SHADER = 10,
         TEXTURE_SHADER_NOLIGHT = 100
     };
 
