@@ -5,12 +5,16 @@ import java.io.IOException;
 import org.gearvrf.GVRActivity;
 import org.gearvrf.GVRAndroidResource;
 import org.gearvrf.GVRContext;
+import org.gearvrf.GVRMaterial.GVRShaderType;
+import org.gearvrf.GVRMesh;
 import org.gearvrf.GVRScene;
 import org.gearvrf.GVRSceneObject;
 import org.gearvrf.GVRScript;
 import org.gearvrf.GVRTexture;
-import org.gearvrf.GVRMesh;
-import org.gearvrf.GVRMaterial.GVRShaderType;
+import org.gearvrf.animation.GVRAnimation;
+import org.gearvrf.animation.GVRAnimationEngine;
+import org.gearvrf.animation.GVRAssimpAnimation;
+import org.gearvrf.animation.GVRRepeatMode;
 
 import android.os.SystemClock;
 import android.util.Log;
@@ -28,18 +32,25 @@ public class MeshAnimationScript extends GVRScript {
 
     private static final String TAG = "MeshAnimationSample";
 
-    private float animationTime;
+    private GVRAnimationEngine mAnimationEngine;
+    GVRAnimation mAssimpAnimation = null;
+    
 
     public MeshAnimationScript(GVRActivity activity) {
         mActivity = activity;
-        animationTime = (float) SystemClock.elapsedRealtime() / 1000.0f;
     }
 
     @Override
     public void onInit(GVRContext gvrContext) {
         mGVRContext = gvrContext;
+        mAnimationEngine = gvrContext.getAnimationEngine();
 
-        GVRScene outlineScene = gvrContext.getNextMainScene();
+        GVRScene outlineScene = gvrContext.getNextMainScene(new Runnable() {
+            @Override
+            public void run() {
+                	mAssimpAnimation.start(mAnimationEngine);
+            }
+        });
 
         try {
             characterMesh = mGVRContext.loadMesh(new GVRAndroidResource(mGVRContext, mModelPath));
@@ -57,6 +68,9 @@ public class MeshAnimationScript extends GVRScript {
 
             outlineScene.addSceneObject(mCharacter);
 
+            mAssimpAnimation = new GVRAssimpAnimation(mCharacter, -1);
+            mAssimpAnimation.setRepeatMode(GVRRepeatMode.REPEATED).setRepeatCount(-1);
+
         } catch (IOException e) {
             e.printStackTrace();
             mActivity.finish();
@@ -67,7 +81,5 @@ public class MeshAnimationScript extends GVRScript {
 
     @Override
     public void onStep() {
-        animationTime = (float) SystemClock.elapsedRealtime() / 1000.0f;
-        characterMesh.animate(animationTime);
     }
 }
