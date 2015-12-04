@@ -57,6 +57,8 @@ public abstract class GVRContext {
 
     private final GVRActivity mContext;
 
+    private GVRAssimpImporter assimpImporter = null;
+
     /*
      * Fields and constants
      */
@@ -217,8 +219,7 @@ public abstract class GVRContext {
             EnumSet<GVRImportSettings> settings) {
         GVRMesh mesh = meshCache.get(androidResource);
         if (mesh == null) {
-            GVRAssimpImporter assimpImporter = GVRImporter
-                    .readFileFromResources(this, androidResource, settings);
+            assimpImporter = GVRImporter.readFileFromResources(this, androidResource, settings);
             mesh = assimpImporter.getMesh(0);
             meshCache.put(androidResource, mesh);
         }
