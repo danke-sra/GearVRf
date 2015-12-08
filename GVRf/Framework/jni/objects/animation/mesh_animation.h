@@ -61,7 +61,7 @@ public:
     void setScene(const aiScene* scene);
 
     void resizeBonesVector(int size);
-    void setGlobalInverTransform(const glm::mat4& globalTransform);
+    void setGlobalInverseTransform(const glm::mat4& globalTransform);
 
     void loadBones(const aiMesh *mesh);
 

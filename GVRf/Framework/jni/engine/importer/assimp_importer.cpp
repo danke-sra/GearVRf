@@ -70,7 +70,7 @@ Mesh* AssimpImporter::getMesh(int index) {
 
     glm::mat4 globalInverseMatrix =
             glm::make_mat4(&(assimp_importer_->GetScene()->mRootNode->mTransformation.a1));
-    meshAnimation.setGlobalInverTransform(globalInverseMatrix);
+    meshAnimation.setGlobalInverseTransform(globalInverseMatrix);
     meshAnimation.resizeBonesVector(ai_mesh->mNumVertices);
 
     // Load all bones information from the Assimp mesh
