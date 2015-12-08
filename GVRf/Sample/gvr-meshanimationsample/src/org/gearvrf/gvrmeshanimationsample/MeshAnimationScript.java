@@ -3,32 +3,24 @@ package org.gearvrf.gvrmeshanimationsample;
 import java.io.IOException;
 
 import org.gearvrf.GVRActivity;
-import org.gearvrf.GVRAndroidResource;
 import org.gearvrf.GVRContext;
-import org.gearvrf.GVRMaterial.GVRShaderType;
-import org.gearvrf.GVRMesh;
 import org.gearvrf.GVRScene;
-import org.gearvrf.GVRSceneObject;
 import org.gearvrf.GVRScript;
-import org.gearvrf.GVRTexture;
 import org.gearvrf.animation.GVRAnimation;
 import org.gearvrf.animation.GVRAnimationEngine;
-import org.gearvrf.animation.GVRAssimpAnimation;
 import org.gearvrf.animation.GVRRepeatMode;
+import org.gearvrf.scene_objects.GVRModelSceneObject;
 
-import android.os.SystemClock;
 import android.util.Log;
 
 public class MeshAnimationScript extends GVRScript {
 
     private GVRContext mGVRContext;
-    private GVRSceneObject mCharacter;
+    private GVRModelSceneObject mCharacter;
 
     private final String mModelPath = "TRex_NoGround.fbx";
-    private final String mDiffuseTexturePath = "t_rex_texture_diffuse.png";
 
     private GVRActivity mActivity;
-    private GVRMesh characterMesh;
 
     private static final String TAG = "MeshAnimationSample";
 
@@ -45,7 +37,7 @@ public class MeshAnimationScript extends GVRScript {
         mGVRContext = gvrContext;
         mAnimationEngine = gvrContext.getAnimationEngine();
 
-        GVRScene outlineScene = gvrContext.getNextMainScene(new Runnable() {
+        GVRScene mainScene = gvrContext.getNextMainScene(new Runnable() {
             @Override
             public void run() {
                 	mAssimpAnimation.start(mAnimationEngine);
@@ -53,24 +45,16 @@ public class MeshAnimationScript extends GVRScript {
         });
 
         try {
-            characterMesh = mGVRContext.loadMesh(new GVRAndroidResource(mGVRContext, mModelPath));
-
-            characterMesh.animate(0.0f);
-            GVRTexture texture = gvrContext.loadTexture(
-                    new GVRAndroidResource(mGVRContext, mDiffuseTexturePath));
-
-            mCharacter = new GVRSceneObject(mGVRContext, characterMesh, texture,
-                    GVRShaderType.MeshAnimation.ID);
+            mCharacter = gvrContext.loadJassimpModel(mModelPath);
             mCharacter.getTransform().setPosition(0.0f, -10.0f, -10.0f);
             mCharacter.getTransform().setRotationByAxis(90.0f, 1.0f, 0.0f, 0.0f);
             mCharacter.getTransform().setRotationByAxis(40.0f, 0.0f, 1.0f, 0.0f);
             mCharacter.getTransform().setScale(1.5f, 1.5f, 1.5f);
 
-            outlineScene.addSceneObject(mCharacter);
+            mainScene.addSceneObject(mCharacter);
 
-            mAssimpAnimation = new GVRAssimpAnimation(mCharacter, -1);
+            mAssimpAnimation = mCharacter.getAnimations().get(0);
             mAssimpAnimation.setRepeatMode(GVRRepeatMode.REPEATED).setRepeatCount(-1);
-
         } catch (IOException e) {
             e.printStackTrace();
             mActivity.finish();
