@@ -23,7 +23,7 @@ void MeshAnimation::setScene(const aiScene* scene) {
     aiScene_ = scene;
 }
 
-void MeshAnimation::setGlobalInverTransform(const glm::mat4& globalTransform) {
+void MeshAnimation::setGlobalInverseTransform(const glm::mat4& globalTransform) {
     global_inverse_transform_ = glm::inverse(globalTransform);
 }
 
