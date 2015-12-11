@@ -40,7 +40,7 @@ public class MeshAnimationScript extends GVRScript {
         GVRScene mainScene = gvrContext.getNextMainScene(new Runnable() {
             @Override
             public void run() {
-                	mAssimpAnimation.start(mAnimationEngine);
+                mAssimpAnimation.start(mAnimationEngine);
             }
         });
 
