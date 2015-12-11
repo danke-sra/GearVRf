@@ -153,11 +153,6 @@ public class GVRMaterial extends GVRHybridObject implements
                 return (number &= ~(1 << index));
             }
         }
-
-        public abstract static class MeshAnimation {
-            public static final GVRMaterialShaderId ID = new GVRStockMaterialShaderId(
-                    10);
-        }
     };
 
     /**

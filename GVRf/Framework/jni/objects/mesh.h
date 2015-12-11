@@ -33,7 +33,6 @@
 #include "gl/gl_buffer.h"
 #include "gl/gl_program.h"
 
-#include "objects/animation/mesh_animation.h"
 #include "util/gvr_gl.h"
 
 #include "objects/components/bone.h"
@@ -51,7 +50,7 @@ public:
             vertices_(), normals_(), tex_coords_(), indices_(), float_vectors_(), vec2_vectors_(), vec3_vectors_(), vec4_vectors_(),
                     have_bounding_volume_(false), vao_dirty_(true),
                     vaoID_(GVR_INVALID), triangle_vboID_(GVR_INVALID), vert_vboID_(GVR_INVALID),
-                    norm_vboID_(GVR_INVALID), tex_vboID_(GVR_INVALID), bon_vboID_(GVR_INVALID),
+                    norm_vboID_(GVR_INVALID), tex_vboID_(GVR_INVALID),
 					boneVboID_(GVR_INVALID), vertexBoneData_(this), bone_data_dirty_(true)
     {
     }
@@ -84,11 +83,9 @@ public:
             gl_delete.queueBuffer(norm_vboID_);
         if (tex_vboID_ != GVR_INVALID)
             gl_delete.queueBuffer(tex_vboID_);
-        if (bon_vboID_ != GVR_INVALID)
-            gl_delete.queueBuffer(bon_vboID_);
         have_bounding_volume_ = false;
         vao_dirty_ = true;
-        vaoID_ = triangle_vboID_ = vert_vboID_ = norm_vboID_ = tex_vboID_ = bon_vboID_ = GVR_INVALID;
+        vaoID_ = triangle_vboID_ = vert_vboID_ = norm_vboID_ = tex_vboID_ = GVR_INVALID;
         bone_data_dirty_ = true;
     }
 
@@ -268,14 +265,6 @@ public:
         vao_dirty_ = true;
     }
 
-    void setMeshAnimation(const MeshAnimation& animation) {
-        mesh_animation = animation;
-    }
-
-    const MeshAnimation& getMeshAnimation() {
-        return mesh_animation;
-    }
-
     // generate VAO
     void generateVAO();
 
@@ -334,7 +323,6 @@ private:
     GLuint vert_vboID_;
     GLuint norm_vboID_;
     GLuint tex_vboID_;
-    GLuint bon_vboID_;
 
     // triangle information
     GLuint numTriangles_;
@@ -342,7 +330,6 @@ private:
 
     bool have_bounding_volume_;
     BoundingVolume bounding_volume;
-    MeshAnimation mesh_animation;
 
     // Bone data for the shader
     VertexBoneData vertexBoneData_;
