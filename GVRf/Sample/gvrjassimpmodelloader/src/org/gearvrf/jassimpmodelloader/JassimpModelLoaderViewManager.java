@@ -86,15 +86,23 @@ public class JassimpModelLoaderViewManager extends GVRScript {
         GVRSceneObject benchModel = gvrContext.loadJassimpModel("bench.dae");
 
         ModelPosition benchModelPosition = new ModelPosition();
-        benchModelPosition.setPosition(0.0f, -4.0f, -30.0f);
+        benchModelPosition.setPosition(0.0f, -4.0f, -20.0f);
 
+        benchModel.getTransform().setScale(0.66f, 0.66f, 0.66f);
         benchModel.getTransform().setPosition(benchModelPosition.x,
                 benchModelPosition.y, benchModelPosition.z);
-        benchModel.getTransform()
-        .setRotationByAxis(180.0f, 0.0f, 1.0f, 0.0f);
+        benchModel.getTransform().setRotationByAxis(180.0f, 0.0f, 1.0f, 0.0f);
 
         mMainScene.addSceneObject(astroBoyModel);
         mMainScene.addSceneObject(benchModel);
+
+        // Model over network
+        String urlBase = "https://raw.githubusercontent.com/danke-sra/GearVRf/jassimp_network/GVRf/Sample/gvrjassimpmodelloader/assets/";
+        GVRSceneObject treesModel = gvrContext.loadJassimpModelFromURL(urlBase + "trees/trees9.3ds");
+        if (treesModel != null) {
+            treesModel.getTransform().setPosition(5.0f, 0.0f, 0.0f);
+            mMainScene.addSceneObject(treesModel);
+        }
     }
 
     @Override
