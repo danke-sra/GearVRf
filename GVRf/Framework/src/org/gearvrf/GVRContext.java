@@ -512,7 +512,8 @@ public abstract class GVRContext {
     }
 
     public GVRModelSceneObject loadJassimpModelFromSD(String externalFile, EnumSet<GVRImportSettings> settings) throws IOException {
-        return GVRImporter.loadJassimpModelFromSD(this, externalFile, settings);
+        return GVRImporter.loadJassimpModel(this, externalFile,
+                GVRResourceVolume.VolumeType.ANDROID_SDCARD, settings);
     }
 
     public GVRModelSceneObject loadJassimpModel(String assetFile) throws IOException {
@@ -520,7 +521,16 @@ public abstract class GVRContext {
     }
 
     public GVRModelSceneObject loadJassimpModel(String assetFile, EnumSet<GVRImportSettings> settings) throws IOException {
-        return GVRImporter.loadJassimpModel(this, assetFile, settings);
+        return GVRImporter.loadJassimpModel(this, assetFile, GVRResourceVolume.VolumeType.ANDROID_ASSETS, settings);
+    }
+
+    public GVRModelSceneObject loadJassimpModelFromURL(String urlString) throws IOException {
+        return loadJassimpModelFromURL(urlString, GVRImportSettings.getRecommendedSettings());
+    }
+
+    public GVRModelSceneObject loadJassimpModelFromURL(String urlString, EnumSet<GVRImportSettings> settings) throws IOException {
+        return GVRImporter.loadJassimpModel(this, urlString,
+                GVRResourceVolume.VolumeType.NETWORK, settings);
     }
 
     /**
