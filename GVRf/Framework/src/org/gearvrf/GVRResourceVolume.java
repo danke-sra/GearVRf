@@ -57,9 +57,17 @@ public class GVRResourceVolume {
      * @throws IOException
      */
     public GVRAndroidResource openResource(String filePath) throws IOException {
+        String path;
+
         switch (volumeType) {
         case ANDROID_ASSETS:
-            return new GVRAndroidResource(gvrContext, getFullPath(defaultPath, filePath));
+            // Resolve '..' and '.'
+            path = getFullPath(defaultPath, filePath);
+            path = new File(path).getCanonicalPath();
+            if (path.startsWith(File.separator)) {
+                path = path.substring(1);
+            }
+            return new GVRAndroidResource(gvrContext, path);
 
         case LINUX_FILESYSTEM:
             return new GVRAndroidResource(getFullPath(defaultPath, filePath));
