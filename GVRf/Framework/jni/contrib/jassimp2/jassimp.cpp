@@ -833,6 +833,8 @@ static bool loadSceneNode(JNIEnv *env, const aiNode *cNode, jobject parent, jobj
 	if (NULL != loadedNode)
 	{
 		*loadedNode = jNode;
+	} else {
+	    env->DeleteLocalRef(jNode);
 	}
 
 	return true;
@@ -846,6 +848,7 @@ static bool loadSceneGraph(JNIEnv *env, const aiScene* cScene, jobject& jScene)
 	if (NULL != cScene->mRootNode)
 	{
 		jobject jRoot;
+		DeleteLocalRef refRoot(env, jRoot);
 
 		if (!loadSceneNode(env, cScene->mRootNode, NULL, &jRoot))
 		{
