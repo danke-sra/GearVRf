@@ -91,13 +91,17 @@ public class GVRJassimpAdapter {
         }
 
         // Triangles
-        IntBuffer indexBuffer = aiMesh.getIndexBuffer();
-        if (indexBuffer != null) {
-            CharBuffer triangles = CharBuffer.allocate(indexBuffer.capacity());
-            for (int i = 0; i < indexBuffer.capacity(); ++i) {
-                triangles.put((char)indexBuffer.get());
+        if (aiMesh.isPureTriangle()) {
+            IntBuffer indexBuffer = aiMesh.getIndexBuffer();
+            if (indexBuffer != null) {
+                CharBuffer triangles = CharBuffer.allocate(indexBuffer.capacity());
+                for (int i = 0; i < indexBuffer.capacity(); ++i) {
+                    triangles.put((char)indexBuffer.get());
+                }
+                mesh.setIndices(triangles.array());
             }
-            mesh.setIndices(triangles.array());
+        } else {
+            Log.w(TAG, "mesh %s is not purely triangles", aiMesh.getName());
         }
 
         // Bones
