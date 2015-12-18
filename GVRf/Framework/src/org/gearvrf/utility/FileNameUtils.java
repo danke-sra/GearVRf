@@ -83,7 +83,7 @@ public class FileNameUtils {
     /**
      * Returns the directory of the file.
      *
-     * @param filePath Path of the file.
+     * @param filePath Path or URL of the file.
      * @return The directory string or {@code null} if
      * there is no parent directory.
      * @throws IllegalArgumentException
