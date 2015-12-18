@@ -16,6 +16,7 @@
 package org.gearvrf;
 
 import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -36,6 +37,7 @@ import org.gearvrf.jassimp2.GVRJassimpAdapter;
 import org.gearvrf.jassimp2.GVRJassimpSceneObject;
 import org.gearvrf.jassimp2.Jassimp;
 import org.gearvrf.scene_objects.GVRModelSceneObject;
+import org.gearvrf.jassimp2.JassimpFileIO;
 import org.gearvrf.utility.FileNameUtils;
 import org.gearvrf.utility.Log;
 
@@ -124,6 +126,54 @@ final class GVRImporter {
         return new GVRAssimpImporter(gvrContext, nativeValue);
     }
 
+    // IO Handler for Jassimp
+    static class ResourceVolumeIO implements JassimpFileIO {
+        private GVRResourceVolume volume;
+        private static final int BUFFER_SIZE = 8192; /* bytes */
+
+        ResourceVolumeIO(GVRResourceVolume volume) {
+            this.volume = volume;
+        }
+
+        @Override
+        public byte[] read(String path) {
+            GVRAndroidResource resource = null;
+            InputStream stream = null;
+            ByteArrayOutputStream ostream = null;
+            try {
+                resource = volume.openResource(path);
+                stream = new BufferedInputStream(resource.getStream(), BUFFER_SIZE);
+                ostream = new ByteArrayOutputStream(stream.available());
+                byte data[] = new byte[BUFFER_SIZE];
+                int count;
+                while ((count = stream.read(data)) != -1) {
+                    ostream.write(data, 0, count);
+                }
+                return ostream.toByteArray();
+            } catch (IOException e) {
+                return null;
+            } finally {
+                if (resource != null) {
+                    resource.closeStream();
+                }
+
+                if (stream != null) {
+                    try {
+                        stream.close();
+                    } catch (IOException e) {
+                    }
+                }
+
+                if (ostream != null) {
+                    try {
+                        ostream.close();
+                    } catch (IOException e) {
+                    }
+                }
+            }
+        }
+    };
+
     static GVRModelSceneObject loadJassimpModel(final GVRContext context, String filePath,
             GVRResourceVolume.VolumeType volumeType,
             EnumSet<GVRImportSettings> settings) throws IOException {
@@ -131,90 +181,36 @@ final class GVRImporter {
         Jassimp.setWrapperProvider(GVRJassimpAdapter.sWrapperProvider);
         org.gearvrf.jassimp2.AiScene assimpScene = null;
 
+        GVRResourceVolume volume = null;
+
         switch (volumeType) {
         case ANDROID_ASSETS:
-            assimpScene = Jassimp.importAssetFile(filePath,
-                    GVRJassimpAdapter.get().toJassimpSettings(settings),
-                    context.getContext().getAssets());
+        case LINUX_FILESYSTEM:
+        case NETWORK:
+            volume = new GVRResourceVolume(context, volumeType,
+                    FileNameUtils.getParentDirectory(filePath));
             break;
 
         case ANDROID_SDCARD:
             String sdPath = Environment.getExternalStorageDirectory().getAbsolutePath();
-            assimpScene = Jassimp.importFile(sdPath + File.separator + filePath,
-                    GVRJassimpAdapter.get().toJassimpSettings(settings));
+            volume = new GVRResourceVolume(context, volumeType,
+                    FileNameUtils.getParentDirectory(sdPath + File.separator + filePath));
             break;
 
-        case LINUX_FILESYSTEM:
-            assimpScene = Jassimp.importFile(filePath,
-                    GVRJassimpAdapter.get().toJassimpSettings(settings));
-            break;
-
-        case NETWORK:
-            // filePath is a URL in this case
-            File tmpFile = downloadFile(context.getActivity(), filePath);
-            if (tmpFile != null) {
-                assimpScene = Jassimp.importFile(tmpFile.getAbsolutePath(),
-                        GVRJassimpAdapter.get().toJassimpSettings(settings));
-                tmpFile.delete();
-            }
-            break;
+        default:
+            Log.e(TAG, "Unsupported volume type: %s", volumeType);
+            return null;
         }
+
+        assimpScene = Jassimp.importFileEx(FileNameUtils.getFilename(filePath),
+                GVRJassimpAdapter.get().toJassimpSettings(settings),
+                new ResourceVolumeIO(volume));
 
         if (assimpScene == null) {
-            throw new IOException("Cannot load a model from path " + filePath +
-                    " from " + volumeType);
-        }
-
-        return new GVRJassimpSceneObject(context, assimpScene,
-                new GVRResourceVolume(context, volumeType, FileNameUtils.getParentDirectory(filePath)));
-    }
-
-    private static File downloadFile(Context context, String urlString) {
-        URL url = null;
-        try {
-            url = new URL(urlString);
-        } catch (IOException e) {
-            Log.e(TAG, "URL error: ", urlString);
             return null;
         }
 
-        String directoryPath = context.getFilesDir().getAbsolutePath();
-        String outputFilename = directoryPath + File.separator + FileNameUtils.getURLFilename(urlString);
-
-        InputStream input = null;
-        // Output stream to write file
-        OutputStream output = null;
-
-        try {
-            input = new BufferedInputStream(url.openStream(), 8192);
-            output = new FileOutputStream(outputFilename);
-
-            byte data[] = new byte[1024];
-            int count;
-            while ((count = input.read(data)) != -1) {
-                // writing data to file
-                output.write(data, 0, count);
-            }
-        } catch (IOException e) {
-            Log.e(TAG, "Failed to download: ", urlString);
-            return null;
-        } finally {
-            if (input != null) {
-                try {
-                    input.close();
-                } catch (IOException e) {
-                }
-            }
-
-            if (output != null) {
-                try {
-                    output.close();
-                } catch (IOException e) {
-                }
-            }
-        }
-
-        return new File(outputFilename);
+        return new GVRJassimpSceneObject(context, assimpScene, volume);
     }
 
     static GVRSceneObject getAssimpModel(final GVRContext context, String assetRelativeFilename,
