@@ -27,6 +27,8 @@ import org.gearvrf.GVRScript;
 import org.gearvrf.animation.GVRAnimation;
 import org.gearvrf.animation.GVRAnimationEngine;
 import org.gearvrf.animation.GVRRepeatMode;
+import org.gearvrf.jassimp2.GVRJassimpAdapter;
+import org.gearvrf.jassimp2.GVRJassimpAdapter.INodeFactory;
 import org.gearvrf.scene_objects.GVRModelSceneObject;
 import org.gearvrf.utility.Log;
 
@@ -102,6 +104,25 @@ public class JassimpModelLoaderViewManager extends GVRScript {
             mMainScene.addSceneObject(treesModel);
         } catch (IOException e) {
             Log.e(TAG, "Failed to load a model from URL: %s", e);
+        }
+
+        // Demo multi-part model (OBJ + MTL) and custom texture format (TGA)
+        demoMultipartAndCustomTexture(gvrContext);
+    }
+
+    private void demoMultipartAndCustomTexture(GVRContext gvrContext) {
+        INodeFactory tgaLoader = new TGATextureLoader();
+        GVRJassimpAdapter.get().addNodeFactory(tgaLoader);
+
+        GVRSceneObject sarahModel = null;
+        try {
+            sarahModel = gvrContext.loadModel("sarah/n901.obj");
+            sarahModel.getTransform().setScale(.15f, .15f, .15f);
+            sarahModel.getTransform().setPosition(-3f, -3f, -10f);
+
+            mMainScene.addSceneObject(sarahModel);
+        } catch (IOException e) {
+            Log.e(TAG, "Failed to load a model: %s", e);
         }
     }
 
