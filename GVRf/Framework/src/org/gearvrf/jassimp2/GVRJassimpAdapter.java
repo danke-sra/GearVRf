@@ -33,7 +33,7 @@ public class GVRJassimpAdapter {
 
     public interface INodeFactory {
         GVRSceneObject createSceneObject(GVRContext ctx, AiNode node);
-        Future<GVRTexture> loadTexture(GVRAndroidResource resource);
+        Future<GVRTexture> loadTexture(GVRContext ctx, GVRAndroidResource resource);
     }
 
     private GVRJassimpAdapter() {
@@ -164,7 +164,7 @@ public class GVRJassimpAdapter {
         Future<GVRTexture> texture = null;
 
         for (INodeFactory factory : mNodeFactories) {
-            texture = factory.loadTexture(resource);
+            texture = factory.loadTexture(ctx, resource);
             if (texture != null)
                 return texture;
         }
