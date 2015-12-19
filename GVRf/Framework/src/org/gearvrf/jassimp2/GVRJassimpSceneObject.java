@@ -151,8 +151,11 @@ public class GVRJassimpSceneObject extends GVRModelSceneObject {
             try {
                 if (volume != null) {
                     GVRAndroidResource resource = volume.openResource(texDiffuseFileName);
-                    Future<GVRTexture> futureDiffuseTexture = getGVRContext()
-                            .loadFutureTexture(resource);
+
+                    // Load texture
+                    Future<GVRTexture> futureDiffuseTexture = GVRJassimpAdapter.get()
+                            .loadTexture(getGVRContext(), resource);
+
                     meshMaterial.setMainTexture(futureDiffuseTexture);
                 }
                 assimpFeatureSet = GVRShaderType.Assimp.setBit(
