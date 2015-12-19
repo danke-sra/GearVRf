@@ -41,6 +41,22 @@ public class ImageUtils
                 Bitmap.Config.ARGB_8888);
     }
 
+    public static Bitmap generateBitmapFlipV(final int[] intArray, final int width,
+            final int height) {
+        int[] pixels = new int[width * height];
+        for (int row = 0; row < height; row++) {
+            int start_position = row * width;
+            int reverse_start_position = (height - 1 - row) * width;
+
+            for (int col = 0; col < width; col++) {
+                pixels[reverse_start_position + col] = intArray[start_position + col];
+            }
+        }
+
+        return Bitmap.createBitmap(pixels, width, height,
+                Bitmap.Config.ARGB_8888);
+    }
+
     /**
      * Generates a {@code Bitmap} from a int array containing {@code width} *
      * {@code height} pixels. The pixel format is in ARGB_8888 format for
