@@ -8,13 +8,16 @@ import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.Future;
 
+import org.gearvrf.GVRAndroidResource;
 import org.gearvrf.GVRBone;
 import org.gearvrf.GVRBoneWeight;
 import org.gearvrf.GVRContext;
 import org.gearvrf.GVRImportSettings;
 import org.gearvrf.GVRMesh;
 import org.gearvrf.GVRSceneObject;
+import org.gearvrf.GVRTexture;
 import org.gearvrf.animation.keyframe.GVRAnimationBehavior;
 import org.gearvrf.animation.keyframe.GVRAnimationChannel;
 import org.gearvrf.animation.keyframe.GVRKeyFrameAnimation;
@@ -30,6 +33,7 @@ public class GVRJassimpAdapter {
 
     public interface INodeFactory {
         GVRSceneObject createSceneObject(GVRContext ctx, AiNode node);
+        Future<GVRTexture> loadTexture(GVRAndroidResource resource);
     }
 
     private GVRJassimpAdapter() {
@@ -154,6 +158,21 @@ public class GVRJassimpAdapter {
         sceneObject.setName(node.getName());
 
         return sceneObject;
+    }
+
+    public Future<GVRTexture> loadTexture(GVRContext ctx, GVRAndroidResource resource) {
+        Future<GVRTexture> texture = null;
+
+        for (INodeFactory factory : mNodeFactories) {
+            texture = factory.loadTexture(resource);
+            if (texture != null)
+                return texture;
+        }
+
+        // Default
+        texture = ctx.loadFutureTexture(resource);
+
+        return texture;
     }
 
     public GVRKeyFrameAnimation createAnimation(AiAnimation aiAnim, GVRSceneObject target) {
