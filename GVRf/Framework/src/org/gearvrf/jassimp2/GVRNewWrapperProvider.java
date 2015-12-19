@@ -2,7 +2,6 @@ package org.gearvrf.jassimp2;
 
 import java.nio.ByteBuffer;
 
-import org.apache.commons.math3.complex.Quaternion;
 import org.joml.Quaternionf;
 
 /*

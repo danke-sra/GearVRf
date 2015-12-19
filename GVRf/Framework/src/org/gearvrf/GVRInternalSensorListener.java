@@ -15,7 +15,7 @@
 
 package org.gearvrf;
 
-import org.apache.commons.math3.complex.Quaternion;
+import org.joml.Quaternionf;
 
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -24,12 +24,12 @@ import android.os.Build;
 
 /** A listener for a TYPE_ROTATION_VECTOR type sensor. */
 class GVRInternalSensorListener implements SensorEventListener {
-    private static final Quaternion COORDINATE_QUATERNION = new Quaternion(
-            Math.sqrt(0.5), 0.0f, 0.0f, -Math.sqrt(0.5));
-    private static final Quaternion OFFSET_QUATERNION = new Quaternion(
-            Math.sqrt(0.5), 0.0f, Math.sqrt(0.5), 0.0f);
-    private static final Quaternion CONSTANT_EXPRESSION = COORDINATE_QUATERNION
-            .getInverse().multiply(OFFSET_QUATERNION);
+    private static final Quaternionf COORDINATE_QUATERNION = new Quaternionf(
+            0.0f, 0.0f, (float)-Math.sqrt(0.5), (float)Math.sqrt(0.5));
+    private static final Quaternionf OFFSET_QUATERNION = new Quaternionf(
+            0.0f, (float)Math.sqrt(0.5), 0.0f, (float)Math.sqrt(0.5));
+    private static final Quaternionf CONSTANT_EXPRESSION = new Quaternionf().set(COORDINATE_QUATERNION)
+            .invert().mul(OFFSET_QUATERNION);
 
     private RotationSensor mSensor = null;
 
@@ -55,14 +55,14 @@ class GVRInternalSensorListener implements SensorEventListener {
             w = event.values[3];
         }
 
-        Quaternion sensorQuaternion = new Quaternion(w, x, y, z);
+        Quaternionf sensorQuaternion = new Quaternionf(x, y, z, w);
 
-        Quaternion quaternion = CONSTANT_EXPRESSION.multiply(sensorQuaternion)
-                .multiply(COORDINATE_QUATERNION);
+        Quaternionf quaternion = new Quaternionf().set(CONSTANT_EXPRESSION).mul(sensorQuaternion)
+                .mul(COORDINATE_QUATERNION);
 
         mSensor.onInternalRotationSensor(GVRTime.getCurrentTime(),
-                (float) quaternion.getQ0(), (float) quaternion.getQ1(),
-                (float) quaternion.getQ2(), (float) quaternion.getQ3(), 0.0f,
+                (float) quaternion.w, (float) quaternion.x,
+                (float) quaternion.y, (float) quaternion.z, 0.0f,
                 0.0f, 0.0f);
     }
 
