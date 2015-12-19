@@ -27,8 +27,8 @@ import org.gearvrf.GVRScript;
 import org.gearvrf.animation.GVRAnimation;
 import org.gearvrf.animation.GVRAnimationEngine;
 import org.gearvrf.animation.GVRRepeatMode;
-import org.gearvrf.animation.keyframe.GVRKeyFrameAnimation;
-import org.gearvrf.jassimp2.GVRJassimpSceneObject;
+import org.gearvrf.jassimp2.GVRJassimpAdapter;
+import org.gearvrf.jassimp2.GVRJassimpAdapter.INodeFactory;
 import org.gearvrf.scene_objects.GVRModelSceneObject;
 import org.gearvrf.utility.Log;
 
@@ -74,23 +74,15 @@ public class JassimpModelLoaderViewManager extends GVRScript {
             setup(animations.get(0));
         }
 
-        ModelPosition astroBoyModelPosition = new ModelPosition();
-        astroBoyModelPosition.setPosition(0.0f, -0.4f, -0.5f);
-
         astroBoyModel.getTransform().setRotationByAxis(45.0f, 0.0f, 1.0f, 0.0f);
         astroBoyModel.getTransform().setScale(3, 3, 3);
-        astroBoyModel.getTransform().setPosition(astroBoyModelPosition.x,
-                astroBoyModelPosition.y, astroBoyModelPosition.z);
+        astroBoyModel.getTransform().setPosition(.2f, -0.4f, -0.5f);
 
         // Model with color
         GVRSceneObject benchModel = gvrContext.loadJassimpModel("bench.dae");
 
-        ModelPosition benchModelPosition = new ModelPosition();
-        benchModelPosition.setPosition(0.0f, -4.0f, -20.0f);
-
         benchModel.getTransform().setScale(0.66f, 0.66f, 0.66f);
-        benchModel.getTransform().setPosition(benchModelPosition.x,
-                benchModelPosition.y, benchModelPosition.z);
+        benchModel.getTransform().setPosition(0.0f, -4.0f, -20.0f);
         benchModel.getTransform().setRotationByAxis(180.0f, 0.0f, 1.0f, 0.0f);
 
         mMainScene.addSceneObject(astroBoyModel);
@@ -103,6 +95,25 @@ public class JassimpModelLoaderViewManager extends GVRScript {
             treesModel.getTransform().setPosition(5.0f, 0.0f, 0.0f);
             mMainScene.addSceneObject(treesModel);
         }
+
+        // Demo multi-part model (OBJ + MTL) and custom texture format (TGA)
+        demoMultipartAndCustomTexture(gvrContext);
+    }
+
+    private void demoMultipartAndCustomTexture(GVRContext gvrContext) {
+        INodeFactory tgaLoader = new TGATextureLoader();
+        GVRJassimpAdapter.get().addNodeFactory(tgaLoader);
+
+        GVRSceneObject treesModel = null;
+        try {
+            treesModel = gvrContext.loadJassimpModel("sarah/n901.obj");
+            treesModel.getTransform().setScale(.15f, .15f, .15f);
+            treesModel.getTransform().setPosition(-3f, -3f, -10f);
+        } catch (IOException e) {
+            return;
+        }
+
+        mMainScene.addSceneObject(treesModel);
     }
 
     @Override
@@ -120,17 +131,5 @@ public class JassimpModelLoaderViewManager extends GVRScript {
     private void setup(GVRAnimation animation) {
         animation.setRepeatMode(GVRRepeatMode.REPEATED).setRepeatCount(-1);
         mAnimations.add(animation);
-    }
-}
-
-class ModelPosition {
-    float x;
-    float y;
-    float z;
-
-    void setPosition(float x, float y, float z) {
-        this.x = x;
-        this.y = y;
-        this.z = z;
     }
 }
