@@ -1537,7 +1537,7 @@ static char *extractAsset(AAssetManager* mgr, const char *name, int *pBufferSize
 	return pBuffer;
 }
 
-// File IO
+// Memory File IO
 
 struct FileOpsData {
     jobject jFileIO;
