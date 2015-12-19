@@ -97,7 +97,7 @@ public class JassimpModelLoaderViewManager extends GVRScript {
         mMainScene.addSceneObject(benchModel);
 
         // Model over network
-        String urlBase = "https://raw.githubusercontent.com/danke-sra/GearVRf/jassimp_network/GVRf/Sample/gvrjassimpmodelloader/assets/";
+        String urlBase = "https://raw.githubusercontent.com/danke-sra/GearVRf-Demos/jassimp_network_demo/gvrjassimpmodelloader/assets/";
         GVRSceneObject treesModel = gvrContext.loadJassimpModelFromURL(urlBase + "trees/trees9.3ds");
         if (treesModel != null) {
             treesModel.getTransform().setPosition(5.0f, 0.0f, 0.0f);
