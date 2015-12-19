@@ -40,6 +40,7 @@ import org.gearvrf.scene_objects.GVRModelSceneObject;
 import org.gearvrf.jassimp2.JassimpFileIO;
 import org.gearvrf.utility.FileNameUtils;
 import org.gearvrf.utility.Log;
+import org.gearvrf.utility.ResourceReader;
 
 import android.content.Context;
 import android.content.res.AssetManager;
@@ -129,7 +130,6 @@ final class GVRImporter {
     // IO Handler for Jassimp
     static class ResourceVolumeIO implements JassimpFileIO {
         private GVRResourceVolume volume;
-        private static final int BUFFER_SIZE = 8192; /* bytes */
 
         ResourceVolumeIO(GVRResourceVolume volume) {
             this.volume = volume;
@@ -138,37 +138,15 @@ final class GVRImporter {
         @Override
         public byte[] read(String path) {
             GVRAndroidResource resource = null;
-            InputStream stream = null;
-            ByteArrayOutputStream ostream = null;
             try {
                 resource = volume.openResource(path);
-                stream = new BufferedInputStream(resource.getStream(), BUFFER_SIZE);
-                ostream = new ByteArrayOutputStream(stream.available());
-                byte data[] = new byte[BUFFER_SIZE];
-                int count;
-                while ((count = stream.read(data)) != -1) {
-                    ostream.write(data, 0, count);
-                }
-                return ostream.toByteArray();
+                byte data[] = ResourceReader.readStream(resource.getStream());
+                return data;
             } catch (IOException e) {
                 return null;
             } finally {
                 if (resource != null) {
                     resource.closeStream();
-                }
-
-                if (stream != null) {
-                    try {
-                        stream.close();
-                    } catch (IOException e) {
-                    }
-                }
-
-                if (ostream != null) {
-                    try {
-                        ostream.close();
-                    } catch (IOException e) {
-                    }
                 }
             }
         }
