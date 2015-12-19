@@ -176,10 +176,7 @@ final class GVRImporter {
 
     static GVRModelSceneObject loadJassimpModel(final GVRContext context, String filePath,
             GVRResourceVolume.VolumeType volumeType,
-            EnumSet<GVRImportSettings> settings) throws IOException {
-
-        Jassimp.setWrapperProvider(GVRJassimpAdapter.sWrapperProvider);
-        org.gearvrf.jassimp2.AiScene assimpScene = null;
+            EnumSet<GVRImportSettings> settings) {
 
         GVRResourceVolume volume = null;
 
@@ -202,15 +199,17 @@ final class GVRImporter {
             return null;
         }
 
-        assimpScene = Jassimp.importFileEx(FileNameUtils.getFilename(filePath),
-                GVRJassimpAdapter.get().toJassimpSettings(settings),
-                new ResourceVolumeIO(volume));
+        Jassimp.setWrapperProvider(GVRJassimpAdapter.sWrapperProvider);
 
-        if (assimpScene == null) {
+        try {
+            org.gearvrf.jassimp2.AiScene assimpScene = Jassimp.importFileEx(FileNameUtils.getFilename(filePath),
+                    GVRJassimpAdapter.get().toJassimpSettings(settings),
+                    new ResourceVolumeIO(volume));
+            return new GVRJassimpSceneObject(context, assimpScene, volume);
+        } catch (IOException e) {
+            Log.e(TAG, "File is not loaded: file=%s volumeType=%s", filePath, volumeType);
             return null;
         }
-
-        return new GVRJassimpSceneObject(context, assimpScene, volume);
     }
 
     static GVRSceneObject getAssimpModel(final GVRContext context, String assetRelativeFilename,
