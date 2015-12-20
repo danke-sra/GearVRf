@@ -15,14 +15,9 @@
 
 package org.gearvrf;
 
-import java.io.BufferedInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.URL;
 import java.util.EnumSet;
 
 import org.gearvrf.GVRAndroidResource.TextureCallback;
@@ -36,13 +31,14 @@ import org.gearvrf.jassimp.GVROldWrapperProvider;
 import org.gearvrf.jassimp2.GVRJassimpAdapter;
 import org.gearvrf.jassimp2.GVRJassimpSceneObject;
 import org.gearvrf.jassimp2.Jassimp;
-import org.gearvrf.scene_objects.GVRModelSceneObject;
 import org.gearvrf.jassimp2.JassimpFileIO;
+import org.gearvrf.scene_objects.GVRModelSceneObject;
 import org.gearvrf.utility.FileNameUtils;
+import org.gearvrf.utility.GVRByteArray;
 import org.gearvrf.utility.Log;
+import org.gearvrf.utility.ResourceCache;
 import org.gearvrf.utility.ResourceReader;
 
-import android.content.Context;
 import android.content.res.AssetManager;
 import android.os.Environment;
 
@@ -150,7 +146,36 @@ final class GVRImporter {
                 }
             }
         }
+
+        protected GVRResourceVolume getResourceVolume() {
+            return volume;
+        }
     };
+
+    static class CachedVolumeIO implements JassimpFileIO {
+        protected ResourceVolumeIO uncachedIO;
+        protected ResourceCache<GVRByteArray> cache;
+
+        public CachedVolumeIO(ResourceVolumeIO uncachedIO) {
+            this.uncachedIO = uncachedIO;
+            cache = new ResourceCache<GVRByteArray>();
+        }
+
+        @Override
+        public byte[] read(String path) {
+            try {
+                GVRAndroidResource resource = uncachedIO.getResourceVolume().openResource(path);
+                GVRByteArray byteArray = cache.get(resource);
+                if (byteArray == null) {
+                    byteArray = GVRByteArray.wrap(uncachedIO.read(path));
+                    cache.put(resource, byteArray);
+                }
+                return byteArray.getByteArray();
+            } catch (IOException e) {
+                return null;
+            }
+        }
+    }
 
     static GVRModelSceneObject loadJassimpModel(final GVRContext context, String filePath,
             GVRResourceVolume.VolumeType volumeType,
@@ -182,10 +207,11 @@ final class GVRImporter {
 
         assimpScene = Jassimp.importFileEx(FileNameUtils.getFilename(filePath),
                 GVRJassimpAdapter.get().toJassimpSettings(settings),
-                new ResourceVolumeIO(volume));
+                new CachedVolumeIO(new ResourceVolumeIO(volume)));
 
         if (assimpScene == null) {
-            return null;
+            throw new IOException("Cannot load a model from path " + filePath +
+                    " from " + volumeType);
         }
 
         return new GVRJassimpSceneObject(context, assimpScene, volume);
