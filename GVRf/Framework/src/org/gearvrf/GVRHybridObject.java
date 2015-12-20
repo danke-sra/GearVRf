@@ -35,7 +35,7 @@ import org.gearvrf.utility.Log;
  * Descendant classes all have native (JNI) implementations; this base class
  * manages the native lifecycles.
  */
-public abstract class GVRHybridObject implements Closeable {
+public abstract class GVRHybridObject extends GVRObject implements Closeable {
 
     private static final String TAG = Log.tag(GVRHybridObject.class);
 
