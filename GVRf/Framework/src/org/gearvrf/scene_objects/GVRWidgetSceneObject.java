@@ -127,7 +127,7 @@ public class GVRWidgetSceneObject extends GVRSceneObject {
 
                 mMeshInfo.mBottomRightX, mMeshInfo.mTopLeftY, mMeshInfo.mZ };
 
-        float[] textcoords = {
+        float[] textCoords = {
                 (float) mMeshInfo.mTopLeftViewCoords[0] / (float) mWidth,
                 (float) mMeshInfo.mBottomRightViewCoords[1] / (float) mHeight,
 
@@ -142,7 +142,7 @@ public class GVRWidgetSceneObject extends GVRSceneObject {
 
         mesh.setVertices(vertices);
         mesh.setNormals(SIMPLE_NORMALS);
-        mesh.setTexCoords(textcoords);
+        mesh.setTexCoords(textCoords);
         mesh.setIndices(SIMPLE_INDICES);
 
         GVRRenderData renderData = new GVRRenderData(gvrContext);

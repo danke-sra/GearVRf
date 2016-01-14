@@ -34,7 +34,7 @@ import com.badlogic.gdx.backends.android.AndroidInput;
 public class GVRWidgetInputDispatcher {
 
     private AndroidInput mInput;
-    float mDownx = 0, mDowny = 0, mDownabsx = 0, mDownabsy = 0;
+    float mDownX = 0, mDownY = 0, mDownAbsX = 0, mDownAbsY= 0;
 
     GVRWidgetSceneObject mPickedObject = null;
 
@@ -92,15 +92,15 @@ public class GVRWidgetInputDispatcher {
                 * view.getHeight();
 
         if (event.getAction() == 0) {
-            mDownabsx = event.getX();
-            mDownabsy = event.getY();
-            mDownx = coords.x;
-            mDowny = coords.y;
+            mDownAbsX = event.getX();
+            mDownAbsY = event.getY();
+            mDownX = coords.x;
+            mDownY = coords.y;
         }
 
         if (event.getAction() == 2 || event.getAction() == 1) {
-            coords.x = event.getX() - mDownabsx + mDownx;
-            coords.y = event.getY() - mDownabsy + mDowny;
+            coords.x = event.getX() - mDownAbsX + mDownX;
+            coords.y = event.getY() - mDownAbsY + mDownY;
         }
 
     }

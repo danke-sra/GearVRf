@@ -869,8 +869,8 @@ class GVRViewManager extends GVRContext implements RotationSensorListener {
     public GVRInputManager getInputManager() {
         return mInputManager;
     }
-	
-	 private void initWithPlugin() throws Throwable {
+
+    private void initWithPlugin() throws Throwable {
         
         mScript.setEGLContext(((EGL10) EGLContext.getEGL())
                 .eglGetCurrentContext());
