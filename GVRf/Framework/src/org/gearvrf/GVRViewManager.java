@@ -27,6 +27,9 @@ import java.util.Queue;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import javax.microedition.khronos.egl.EGL10;
+import javax.microedition.khronos.egl.EGLContext;
+
 import org.gearvrf.GVRRenderData.GVRRenderMaskBit;
 import org.gearvrf.GVRScript.SplashMode;
 import org.gearvrf.animation.GVRAnimation;
@@ -597,6 +600,10 @@ class GVRViewManager extends GVRContext implements RotationSensorListener {
             }
 
             try {
+                if (mScript.getCurrentPlugin() != null) {
+                    initWithPlugin();
+                }
+
                 GVRViewManager.this.getEventManager().sendEvent(
                         mScript, IScriptEvents.class,
                         "onInit", GVRViewManager.this);
@@ -882,5 +889,15 @@ class GVRViewManager extends GVRContext implements RotationSensorListener {
     @Override
     public GVRScriptManager getScriptManager() {
         return mScriptManager;
+    }
+
+    private void initWithPlugin() throws Throwable {
+        mScript.setEGLContext(((EGL10) EGLContext.getEGL())
+                .eglGetCurrentContext());
+        mScript.getCurrentPlugin().syncNotify();
+        
+        while (!mScript.getCurrentPlugin().isInitialised()) {
+            mScript.getCurrentPlugin().syncWait();
+        }
     }
 }

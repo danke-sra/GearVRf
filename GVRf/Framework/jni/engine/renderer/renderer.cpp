@@ -570,6 +570,10 @@ void Renderer::renderRenderData(RenderData* render_data,
                                     glm::inverseTranspose(mv_matrix),
                                     mvp_matrix, render_data, curr_material);
                             break;
+                        case Material::ShaderType::UNLIT_FBO_SHADER:
+                            shader_manager->getUnlitFboShader()->render(
+                                    mvp_matrix, render_data, curr_material);
+                            break;
                         default:
                             shader_manager->getCustomShader(
                                     curr_material->shader_type())->render(
