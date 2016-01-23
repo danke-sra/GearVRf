@@ -4,7 +4,11 @@
 ![Latest Model Loading Sample](https://github.com/danke-sra/GearVRf/blob/master/GVRf/Sample/gvrjassimpmodelloader/demo-screenshot.png)
 Latest model loading sample, featuring skeletal animation, multipart model loading (OBJ+MTL), multiple model formats (Collada, 3DS and OBJ), and custom texture decoder (TGA), local and network model loading.
 
-### Recent framework mods
+### Recent framework mods/updates
+* Directional light and shadow rendering
+* LibGDX widgets
+* Remote interactive shell supporting Lua and Javascript
+* Lua and Javascript support
 * Custom FileIO wrapper and custom texture loader. See [demo page here](https://github.com/danke-sra/GearVRf/tree/master/GVRf/Sample/gvrjassimpmodelloader).
 * Skeletal animation support. Fastest animation engine in all open-source solutions based on Assimp. [Demo source here.] (https://github.com/danke-sra/GearVRf/tree/master/GVRf/Sample/gvrjassimpmodelloader)<br>
 * Loading and playing keyframe animations from FBX and Collada files.<br>
