@@ -15,7 +15,9 @@
 
 package org.gearvrf.debug;
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.net.ServerSocket;
@@ -43,9 +45,9 @@ import org.gearvrf.debug.cli.Shell;
  * the terminal to add a CR (\r) for each LF (\n) for proper display.
  */
 public class DebugServer implements Runnable {
-    public static final boolean RUN_DEBUG_SERVER = true;
     public static final int DEFAULT_DEBUG_PORT = 1645;
     public static final int NUM_CLIENTS = 2;
+    public static final boolean SIMULATE_TELNET = true;
 
     private static final String PROMPT = "gvrf";
     private static final String APP_NAME = "GearVR Framework";
@@ -67,12 +69,26 @@ public class DebugServer implements Runnable {
 
         @Override
         public Object call() throws Exception {
-            PrintStream out = new PrintStream(socket.getOutputStream());
             // Hand over to shell
-            Shell shell = ConsoleFactory.createConsoleShell(PROMPT, APP_NAME,
-                    new ShellCommandHandler(gvrContext),
-                    new BufferedReader(new InputStreamReader(socket.getInputStream())),
-                    out, out);
+            Shell shell = null;
+
+            if (SIMULATE_TELNET) {
+                InputStream keyBindings = new ByteArrayInputStream(
+                        JlineKeyBindings.KeyBindings_getBlock());
+
+                // Supporting editing and history
+                shell = ConsoleFactory.createTelnetConsoleShell(PROMPT, APP_NAME,
+                        new ShellCommandHandler(gvrContext),
+                        socket.getInputStream(), socket.getOutputStream(), keyBindings);
+            } else {
+                // Simple console
+                PrintStream out = new PrintStream(socket.getOutputStream());
+                shell = ConsoleFactory.createConsoleShell(PROMPT, APP_NAME,
+                        new ShellCommandHandler(gvrContext),
+                        new BufferedReader(new InputStreamReader(socket.getInputStream())),
+                        out, out);
+            }
+
             shell.commandLoop();
             socket.close();
             return null;
