@@ -20,3 +20,7 @@ Latest model loading sample, featuring skeletal animation, multipart model loadi
 [GearVRf project](http://www.gearvrf.org/)<br>
 [Oculus Mobile SDK](https://developer.oculus.com/downloads/mobile/1.0.0.0/Oculus_Mobile_SDK/)<br>
 [Official Assimp Importer github](https://github.com/assimp/assimp)<br>
+
+### Dependency development
+[JNLua on github](https://github.com/danke-sra/jnlua-android)<br>
+[JLine and NVT4J for Android on github](https://github.com/danke-sra/jline-android)<br>
