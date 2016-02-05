@@ -56,6 +56,9 @@ public class GVRActivity extends Activity {
     public static final int KEY_EVENT_MAX = 6;
 
     private GVRViewManager mViewManager;
+    private GVRViewManager mGVRViewManager = null;
+    private GVRCamera mCamera;
+    private GVRScript mGVRScript;
     private VrAppSettings mAppSettings;
 
     // Group of views that are going to be drawn
@@ -162,6 +165,7 @@ public class GVRActivity extends Activity {
      *            directory under the application's {@code assets} directory.
      */
     public void setScript(GVRScript gvrScript, String distortionDataFileName) {
+        this.mGVRScript = gvrScript;
         if (getRequestedOrientation() == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE) {
 
             GVRXMLParser xmlParser = new GVRXMLParser(getAssets(),
@@ -181,6 +185,14 @@ public class GVRActivity extends Activity {
             throw new IllegalArgumentException(
                     "You can not set orientation to portrait for GVRF apps.");
         }
+    }
+
+    /**
+     * Gets the {@linkplain GVRScript a script} linked to the activity.
+     * @return the {@link GVRScript}.
+     */
+    public GVRScript getScript() {
+        return mGVRScript;
     }
 
     /**
