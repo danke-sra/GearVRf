@@ -19,6 +19,7 @@ import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
@@ -655,5 +656,15 @@ public class GVRAsynchronousResourceLoader {
         return AsyncBitmapTexture.decodeStream(stream,
                 AsyncBitmapTexture.glMaxTextureSize,
                 AsyncBitmapTexture.glMaxTextureSize, true, null, closeStream);
+    }
+
+    /**
+     * Load a atlas map information asynchronously.
+     *
+     * @param ins
+     *            JSON text stream
+     */
+    public static List<GVRAtlasInformation> loadAtlasInformations(InputStream ins) {
+        return AsyncAtlasInfo.loadAtlasInformations(ins);
     }
 }
