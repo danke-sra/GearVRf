@@ -137,8 +137,8 @@ public abstract class GVRInputManager {
 
     private GVRCursorType getGVRInputDeviceType(InputDevice device) {
         if (device != null) {
-            if ((device.getSources()
-                    & InputDevice.SOURCE_MOUSE) == InputDevice.SOURCE_MOUSE) {
+            int sources = device.getSources();
+            if ((sources & InputDevice.SOURCE_MOUSE) == InputDevice.SOURCE_MOUSE) {
 
                 // We do not want to add the Oculus touchpad as a mouse device.
                 if (device
@@ -149,36 +149,46 @@ public abstract class GVRInputManager {
                             : GVRCursorType.UNKNOWN);
                 }
                 return GVRCursorType.MOUSE;
-            } else if ((device.getSources()
-                    & InputDevice.SOURCE_GAMEPAD) == InputDevice.SOURCE_GAMEPAD
-                    || (device.getSources()
-                            & InputDevice.SOURCE_JOYSTICK) == InputDevice.SOURCE_JOYSTICK) {
+            } else if ((sources & InputDevice.SOURCE_GAMEPAD) == InputDevice.SOURCE_GAMEPAD
+                    || (sources & InputDevice.SOURCE_JOYSTICK) == InputDevice.SOURCE_JOYSTICK) {
                 return GVRCursorType.CONTROLLER;
+            } else if ((sources & InputDevice.SOURCE_KEYBOARD) == InputDevice.SOURCE_KEYBOARD) {
+                // Allow device keyboard to be a gaze controller if enabled
+                return useGazeCursorController
+                        ? GVRCursorType.GAZE
+                        : GVRCursorType.UNKNOWN;
             }
         }
         return GVRCursorType.UNKNOWN;
     }
 
-    // Return the key if there is one else return -1
-    private long getCacheKey(InputDevice device, GVRCursorType cursorType) {
+    // Return the key if there is one else return 0 (note: -1 is the ID of an Android input device)
+    private long getCacheKey(InputDevice device, int deviceId, GVRCursorType cursorType) {
         if (cursorType != GVRCursorType.UNKNOWN
                 && cursorType != GVRCursorType.EXTERNAL) {
             // Sometimes a device shows up using two device ids
             // here we try to show both devices as one using the
             // product and vendor id
-            long key = device.getVendorId() << 32;
-            key = key | device.getProductId();
+            long key = 0;
+            if (device.getProductId() != 0 && device.getVendorId() != 0) {
+                key = device.getVendorId() << 32;
+                key = key | device.getProductId();
+            } else {
+                // If there is no product/vendor ID (non-USB device), use device Id.
+                // The key/deviceId can be -1 for android's default input
+                key = deviceId;
+            }
             return key;
         }
-        return -1;
+        return 0; // invalid key
     }
 
     // returns controller if a new device is found
     private GVRBaseController addDevice(int deviceId) {
         InputDevice device = inputManager.getInputDevice(deviceId);
         GVRCursorType cursorType = getGVRInputDeviceType(device);
-        long key = getCacheKey(device, cursorType);
-        if (key != -1) {
+        long key = getCacheKey(device, deviceId, cursorType);
+        if (key != 0) {
             GVRBaseController controller = cache.get(key);
             if (controller == null) {
                 if (cursorType == GVRCursorType.MOUSE) {
