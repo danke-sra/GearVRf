@@ -35,6 +35,7 @@ import org.gearvrf.GVRContext;
 import org.gearvrf.GVRCubemapTexture;
 import org.gearvrf.GVRHybridObject;
 import org.gearvrf.GVRMesh;
+import org.gearvrf.GVRObject;
 import org.gearvrf.GVRRenderData;
 import org.gearvrf.GVRShaders;
 import org.gearvrf.GVRTexture;
@@ -524,7 +525,7 @@ public class GVRAsynchronousResourceLoader {
         return result;
     }
 
-    private static class FutureResource<T extends GVRHybridObject> implements
+    private static class FutureResource<T extends GVRObject> implements
             Future<T> {
 
         private static final String TAG = Log.tag(FutureResource.class);

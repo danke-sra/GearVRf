@@ -44,6 +44,7 @@ import org.gearvrf.utility.Log;
 import org.gearvrf.utility.ResourceCache;
 import org.gearvrf.utility.ResourceReader;
 
+import android.content.Context;
 import android.content.res.AssetManager;
 import android.os.Environment;
 
@@ -227,6 +228,65 @@ final class GVRImporter {
         }
 
         return new GVRJassimpSceneObject(context, assimpScene, volume);
+    }
+
+    static File downloadFile(Context context, String urlString) {
+        URL url = null;
+        try {
+            url = new URL(urlString);
+        } catch (IOException e) {
+            Log.e(TAG, "URL error: ", urlString);
+            return null;
+        }
+
+        String directoryPath = context.getCacheDir().getAbsolutePath();
+        // add a uuid value for the url to prevent aliasing from files sharing
+        // same name inside one given app
+        String outputFilename = directoryPath + File.separator
+                + UUID.nameUUIDFromBytes(urlString.getBytes()).toString()
+                + FileNameUtils.getURLFilename(urlString);
+
+        Log.d(TAG, "URL filename: %s", outputFilename);
+        
+        File localCopy = new File(outputFilename);
+        if (localCopy.exists()) {
+            return localCopy;
+        }
+
+        InputStream input = null;
+        // Output stream to write file
+        OutputStream output = null;
+
+        try {
+            input = new BufferedInputStream(url.openStream(), 8192);
+            output = new FileOutputStream(outputFilename);
+
+            byte data[] = new byte[1024];
+            int count;
+            while ((count = input.read(data)) != -1) {
+                // writing data to file
+                output.write(data, 0, count);
+            }
+        } catch (IOException e) {
+            Log.e(TAG, "Failed to download: ", urlString);
+            return null;
+        } finally {
+            if (input != null) {
+                try {
+                    input.close();
+                } catch (IOException e) {
+                }
+            }
+
+            if (output != null) {
+                try {
+                    output.close();
+                } catch (IOException e) {
+                }
+            }
+        }
+
+        return new File(outputFilename);
     }
 
     static GVRSceneObject getAssimpModel(final GVRContext context, String assetRelativeFilename,
