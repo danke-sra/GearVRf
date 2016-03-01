@@ -22,20 +22,26 @@
 
 #include "gl/gl_texture.h"
 #include "objects/hybrid_object.h"
+#include "objects/gl_pending_task.h"
 
 namespace gvr {
 
-class Texture: public HybridObject {
+class Texture: public HybridObject, GLPendingTask {
 public:
     virtual ~Texture() {
         delete gl_texture_;
     }
 
-    virtual GLuint getId() const {
+    // Should be called in GL context.
+    virtual GLuint getId() {
         if (gl_texture_ == 0) {
             // must be recycled already. The caller will handle error.
             return 0;
         }
+
+        // Before returning the ID makes sure nothing is pending
+        runPendingGL();
+
         return gl_texture_->id();
     }
 
@@ -56,8 +62,7 @@ public:
 
         // Sets the anisotropic filtering if the value provided is greater than 1 because 1 is the default value
         if (texture_parameters[2] > 1.0f) {
-            glTexParameterf(target, GL_TEXTURE_MAX_ANISOTROPY_EXT,
-                    texture_parameters[2]);
+            glTexParameterf(target, GL_TEXTURE_MAX_ANISOTROPY_EXT, texture_parameters[2]);
         }
 
         glTexParameteri(target, GL_TEXTURE_WRAP_S, wrap_s_type_);
@@ -69,12 +74,27 @@ public:
 
     virtual GLenum getTarget() const = 0;
 
+    virtual void runPendingGL() {
+        if (gl_texture_) {
+            gl_texture_->runPendingGL();
+        }
+    }
+
+    bool isReady() {
+        return ready;
+    }
+
+    void setReady(bool ready) {
+        this->ready = ready;
+    }
+
 protected:
     Texture(GLTexture* gl_texture) : HybridObject() {
         gl_texture_ = gl_texture;
     }
 
-    const GLTexture* gl_texture_;
+    GLTexture* gl_texture_;
+    bool gl_texture_bound_;
 
 private:
     Texture(const Texture& texture);
@@ -84,6 +104,7 @@ private:
 
 private:
     static const GLenum target = GL_TEXTURE_2D;
+    bool ready = false;
 };
 
 }

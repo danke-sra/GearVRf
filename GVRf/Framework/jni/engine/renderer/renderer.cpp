@@ -95,11 +95,36 @@ void Renderer::frustum_cull(Camera *camera, SceneObject *object,
     }
 }
 
+void Renderer::state_sort() {
+    // The current implementation of sorting is based on
+    // 1. rendering order first to maintain specified order
+    // 2. shader type second to minimize the gl cost of switching shader
+    // 3. camera distance last to minimize overdraw
+    std::sort(render_data_vector.begin(), render_data_vector.end(),
+            compareRenderDataByOrderShaderDistance);
+
+    if (DEBUG_RENDERER) {
+        LOGD("SORTING: After sorting");
+
+        for (int i = 0; i < render_data_vector.size(); ++i) {
+            RenderData* renderData = render_data_vector[i];
+
+            if (DEBUG_RENDERER) {
+                LOGD(
+                        "SORTING: pass_count = %d, rendering order = %d, shader_type = %d, camera_distance = %f\n",
+                        renderData->pass_count(), renderData->rendering_order(),
+                        renderData->material(0)->shader_type(),
+                        renderData->camera_distance());
+            }
+        }
+    }
+}
+
 void Renderer::cull(Scene *scene, Camera *camera,
         ShaderManager* shader_manager) {
 
-    if (camera->owner_object() == 0 ||
-        camera->owner_object()->transform() == nullptr) {
+    if (camera->owner_object() == 0
+            || camera->owner_object()->transform() == nullptr) {
         return;
     }
     glm::mat4 view_matrix = camera->getViewMatrix();
@@ -108,6 +133,7 @@ void Renderer::cull(Scene *scene, Camera *camera,
 
     render_data_vector.clear();
     std::vector<SceneObject*> scene_objects;
+    scene_objects.reserve(1024);
 
     // 1. Travese all scene objects in the scene as a tree and do frustum culling at the same time if enabled
     if (scene->get_frustum_culling()) {
@@ -145,9 +171,9 @@ void Renderer::cull(Scene *scene, Camera *camera,
     // 2. do occlusion culling, if enabled
     occlusion_cull(scene, scene_objects, shader_manager, vp_matrix);
 
-    // 3. do sorting based on render order
-    std::sort(render_data_vector.begin(), render_data_vector.end(),
-            compareRenderData);
+    // 3. do state sorting
+    // Note: this needs to be scaled to sort on N states
+    state_sort();
 }
 
 void Renderer::renderCamera(Scene* scene, Camera* camera, int framebufferId,
@@ -214,53 +240,52 @@ void Renderer::renderCamera(Scene* scene, Camera* camera, int framebufferId,
 
     std::vector<PostEffectData*> post_effects = camera->post_effect_data();
 
-    glEnable (GL_DEPTH_TEST);
-    glDepthFunc (GL_LEQUAL);
-    glEnable (GL_CULL_FACE);
-    glFrontFace (GL_CCW);
-    glCullFace (GL_BACK);
-    glEnable (GL_BLEND);
-    glDisable(GL_SAMPLE_ALPHA_TO_COVERAGE);
-    glBlendEquation (GL_FUNC_ADD);
-    glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-    glDisable (GL_POLYGON_OFFSET_FILL);
+    GL(glEnable (GL_DEPTH_TEST));
+    GL(glDepthFunc (GL_LEQUAL));
+    GL(glEnable (GL_CULL_FACE));
+    GL(glFrontFace (GL_CCW));
+    GL(glCullFace (GL_BACK));
+    GL(glEnable (GL_BLEND));
+    GL(glDisable(GL_SAMPLE_ALPHA_TO_COVERAGE));
+    GL(glBlendEquation (GL_FUNC_ADD));
+    GL(glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA));
+    GL(glDisable (GL_POLYGON_OFFSET_FILL));
 
     if (post_effects.size() == 0) {
-        glBindFramebuffer(GL_FRAMEBUFFER, framebufferId);
-        glViewport(viewportX, viewportY, viewportWidth, viewportHeight);
-        glClearColor(camera->background_color_r(), camera->background_color_g(),
-                camera->background_color_b(), camera->background_color_a());
+        GL(glBindFramebuffer(GL_FRAMEBUFFER, framebufferId));
+        GL(glViewport(viewportX, viewportY, viewportWidth, viewportHeight));
 
-        glClearColor(camera->background_color_r(), camera->background_color_g(),
-                camera->background_color_b(), camera->background_color_a());
-        glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+        GL(glClearColor(camera->background_color_r(),
+                camera->background_color_g(), camera->background_color_b(),
+                camera->background_color_a()));
+        GL(glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT));
 
         for (auto it = render_data_vector.begin();
                 it != render_data_vector.end(); ++it) {
-            renderRenderData(*it, view_matrix, projection_matrix,
-                    camera->render_mask(), shader_manager, modeShadow);
+            GL(renderRenderData(*it, view_matrix, projection_matrix,
+                    camera->render_mask(), shader_manager, modeShadow));
         }
     } else {
         RenderTexture* texture_render_texture = post_effect_render_texture_a;
         RenderTexture* target_render_texture;
 
-        glBindFramebuffer(GL_FRAMEBUFFER,
-                texture_render_texture->getFrameBufferId());
-        glViewport(0, 0, texture_render_texture->width(),
-                texture_render_texture->height());
+        GL(glBindFramebuffer(GL_FRAMEBUFFER,
+                texture_render_texture->getFrameBufferId()));
+        GL(glViewport(0, 0, texture_render_texture->width(),
+                texture_render_texture->height()));
 
-        glClearColor(camera->background_color_r(), camera->background_color_g(),
-                camera->background_color_b(), camera->background_color_a());
-        glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+        GL(glClearColor(camera->background_color_r(),
+                camera->background_color_g(), camera->background_color_b(), camera->background_color_a()));
+        GL(glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT));
 
         for (auto it = render_data_vector.begin();
                 it != render_data_vector.end(); ++it) {
-            renderRenderData(*it, view_matrix, projection_matrix,
-                    camera->render_mask(), shader_manager, modeShadow);
+            GL(renderRenderData(*it, view_matrix, projection_matrix,
+                    camera->render_mask(), shader_manager, modeShadow));
         }
 
-        glDisable(GL_DEPTH_TEST);
-        glDisable(GL_CULL_FACE);
+        GL(glDisable(GL_DEPTH_TEST));
+        GL(glDisable(GL_CULL_FACE));
 
         for (int i = 0; i < post_effects.size() - 1; ++i) {
             if (i % 2 == 0) {
@@ -270,24 +295,27 @@ void Renderer::renderCamera(Scene* scene, Camera* camera, int framebufferId,
                 texture_render_texture = post_effect_render_texture_b;
                 target_render_texture = post_effect_render_texture_a;
             }
-            glBindFramebuffer(GL_FRAMEBUFFER, framebufferId);
-            glViewport(viewportX, viewportY, viewportWidth, viewportHeight);
+            GL(glBindFramebuffer(GL_FRAMEBUFFER, framebufferId));
+            GL(glViewport(viewportX, viewportY, viewportWidth, viewportHeight));
 
-            glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-            renderPostEffectData(camera, texture_render_texture,
-                    post_effects[i], post_effect_shader_manager);
+            GL(glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT));
+            GL(renderPostEffectData(camera, texture_render_texture,
+                    post_effects[i], post_effect_shader_manager));
         }
 
-        glBindFramebuffer(GL_FRAMEBUFFER, framebufferId);
-        glViewport(viewportX, viewportY, viewportWidth, viewportHeight);
-        glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-        renderPostEffectData(camera, texture_render_texture,
-                post_effects.back(), post_effect_shader_manager);
+        GL(glBindFramebuffer(GL_FRAMEBUFFER, framebufferId));
+        GL(glViewport(viewportX, viewportY, viewportWidth, viewportHeight));
+        GL(glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT));
+        renderPostEffectData(camera, texture_render_texture, post_effects.back(), post_effect_shader_manager);
     }
+
+    GL(glDisable(GL_DEPTH_TEST));
+    GL(glDisable(GL_CULL_FACE));
+    GL(glDisable(GL_BLEND));
 }
 
 void addRenderData(RenderData *render_data) {
-    if (render_data == 0 || render_data->pass(0)->material() == 0) {
+    if (render_data == 0 || render_data->material(0) == 0) {
         return;
     }
 
@@ -321,7 +349,7 @@ void Renderer::occlusion_cull(Scene* scene,
     for (auto it = scene_objects.begin(); it != scene_objects.end(); ++it) {
         SceneObject *scene_object = (*it);
         RenderData* render_data = scene_object->render_data();
-        if (render_data == 0 || render_data->pass(0)->material() == 0) {
+        if (render_data == 0 || render_data->material(0) == 0) {
             continue;
         }
 
@@ -339,7 +367,7 @@ void Renderer::occlusion_cull(Scene* scene,
         if (!is_query_issued) {
             //Setup basic bounding box and material
             RenderData* bounding_box_render_data(new RenderData());
-            Mesh* bounding_box_mesh = render_data->mesh()->getBoundingBox();
+            Mesh* bounding_box_mesh = render_data->mesh()->createBoundingBox();
             Material *bbox_material = new Material(
                     Material::BOUNDING_BOX_SHADER);
             RenderPass *pass = new RenderPass();
@@ -361,7 +389,7 @@ void Renderer::occlusion_cull(Scene* scene,
             glBeginQuery(GL_ANY_SAMPLES_PASSED, query[0]);
             shader_manager->getBoundingBoxShader()->render(mvp_matrix_tmp,
                     bounding_box_render_data,
-                    bounding_box_render_data->pass(0)->material());
+                    bounding_box_render_data->material(0));
             glEndQuery (GL_ANY_SAMPLES_PASSED);
             scene_object->set_query_issued(true);
 
@@ -616,19 +644,19 @@ void Renderer::renderRenderData(RenderData* render_data,
 
     if (render_mask & render_data->render_mask()) {
         if (render_data->offset()) {
-            glEnable (GL_POLYGON_OFFSET_FILL);
-            glPolygonOffset(render_data->offset_factor(),
-                    render_data->offset_units());
+            GL(glEnable (GL_POLYGON_OFFSET_FILL));
+            GL(glPolygonOffset(render_data->offset_factor(),
+                    render_data->offset_units()));
         }
         if (!render_data->depth_test()) {
-            glDisable (GL_DEPTH_TEST);
+            GL(glDisable (GL_DEPTH_TEST));
         }
         if (!render_data->alpha_blend()) {
-            glDisable (GL_BLEND);
+            GL(glDisable (GL_BLEND));
         }
         if( render_data->alpha_to_coverage()) {
-        	glEnable(GL_SAMPLE_ALPHA_TO_COVERAGE);
-        	glSampleCoverage(render_data->sample_coverage(),render_data->invert_coverage_mask());
+            GL(glEnable(GL_SAMPLE_ALPHA_TO_COVERAGE));
+            GL(glSampleCoverage(render_data->sample_coverage(),render_data->invert_coverage_mask()));
         }
 
         if (render_data->mesh() != 0) {
@@ -640,6 +668,12 @@ void Renderer::renderRenderData(RenderData* render_data,
                 set_face_culling(render_data->pass(curr_pass)->cull_face());
                 Material* curr_material =
                         render_data->pass(curr_pass)->material();
+
+                //Skip the material whose texture is not ready with some exceptions
+                if (!checkTextureReady(curr_material)) {
+                    continue;
+                }
+
                 Transform* const t = render_data->owner_object()->transform();
 
                 if (curr_material != nullptr && nullptr != t) {
@@ -761,22 +795,45 @@ void Renderer::renderRenderData(RenderData* render_data,
         // TODO: There's a lot of redundant state changes. If on every render face culling is being set there's no need to
         // restore defaults. Possibly later we could add a OpenGL state wrapper to avoid redundant api calls.
         if (render_data->cull_face() != RenderData::CullBack) {
-            glEnable (GL_CULL_FACE);
-            glCullFace (GL_BACK);
+            GL(glEnable (GL_CULL_FACE));
+            GL(glCullFace (GL_BACK));
         }
 
         if (render_data->offset()) {
-            glDisable (GL_POLYGON_OFFSET_FILL);
+            GL(glDisable (GL_POLYGON_OFFSET_FILL));
         }
         if (!render_data->depth_test()) {
-            glEnable (GL_DEPTH_TEST);
+            GL(glEnable (GL_DEPTH_TEST));
         }
         if (!render_data->alpha_blend()) {
-            glEnable (GL_BLEND);
+            GL(glEnable (GL_BLEND));
         }
         if (render_data->alpha_to_coverage()) {
-        	glDisable(GL_SAMPLE_ALPHA_TO_COVERAGE);
+            GL(glDisable(GL_SAMPLE_ALPHA_TO_COVERAGE));
         }
+    }
+}
+
+bool Renderer::checkTextureReady(Material* material) {
+    int shaderType = material->shader_type();
+
+    //Skip custom shader here since they are rendering multiple textures
+    //Check the textures later inside the rendering pass inside the custom shader
+    if (shaderType < 0
+            || shaderType >= Material::ShaderType::BUILTIN_SHADER_SIZE) {
+        return true;
+    }
+    //For regular shaders, check its main texture
+    else if (shaderType != Material::ShaderType::ASSIMP_SHADER) {
+        return material->isMainTextureReady();
+    }
+    //For ASSIMP_SHADER as diffused texture, check its main texture
+    //For non diffused texture, the rendering doesn't take any textures and needs to be skipped
+    else if (ISSET(material->get_shader_feature_set(), AS_DIFFUSE_TEXTURE)) {
+        return material->isMainTextureReady();
+    }
+    else {
+        return true;
     }
 }
 
@@ -808,11 +865,12 @@ void Renderer::renderPostEffectData(Camera* camera,
                     post_effect_shader_manager->quad_triangles());
             break;
         }
-    } catch (std::string &error) {
-        LOGE("Error detected in Renderer::renderPostEffectData; error : %s",
-                error.c_str());
+    } catch (const std::string& error) {
+        LOGE(
+                "Error detected in Renderer::renderPostEffectData; error : %s", error.c_str());
     }
 }
+
 
 void Renderer::set_face_culling(int cull_face) {
     switch (cull_face) {

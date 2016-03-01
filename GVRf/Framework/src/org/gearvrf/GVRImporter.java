@@ -15,10 +15,15 @@
 
 package org.gearvrf;
 
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.URL;
 import java.util.EnumSet;
+import java.util.UUID;
 
 import org.gearvrf.GVRAndroidResource.TextureCallback;
 import org.gearvrf.GVRMaterial.GVRShaderType;
@@ -180,6 +185,13 @@ final class GVRImporter {
     static GVRModelSceneObject loadJassimpModel(final GVRContext context, String filePath,
             GVRResourceVolume.VolumeType volumeType,
             EnumSet<GVRImportSettings> settings) throws IOException {
+        return loadJassimpModel(context, filePath, volumeType, settings, false);
+    }
+
+    static GVRModelSceneObject loadJassimpModel(final GVRContext context,
+            String filePath, GVRResourceVolume.VolumeType volumeType,
+            EnumSet<GVRImportSettings> settings, boolean cacheEnabled)
+                    throws IOException {
 
         Jassimp.setWrapperProvider(GVRJassimpAdapter.sWrapperProvider);
         org.gearvrf.jassimp2.AiScene assimpScene = null;

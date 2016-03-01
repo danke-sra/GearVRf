@@ -29,30 +29,67 @@ public class GVRResourceVolume {
     private static final String TAG = GVRResourceVolume.class.getSimpleName();
 
     public enum VolumeType {
-        ANDROID_ASSETS,
-        ANDROID_SDCARD,
-        LINUX_FILESYSTEM,
-        NETWORK,
+        ANDROID_ASSETS ("assets", "/"),
+        ANDROID_SDCARD ("sdcard", "/"),
+        LINUX_FILESYSTEM ("linux", "/"),
+        NETWORK ("url", "/");
+
+        private String name;
+        private String separator;
+
+        VolumeType(String name, String separator) {
+            this.name = name;
+            this.separator = separator;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public String getSeparator() {
+            return separator;
+        }
+
+        // Gets a volume type from a string. For example, when loading
+        // a script from a bundle file, the volume type attribute needs
+        // to be converted to a VolumeType.
+        public static VolumeType fromString(String name) {
+            for (VolumeType type : VolumeType.values()) {
+                if (type.getName().equalsIgnoreCase(name)) // case insensitive
+                    return type;
+            }
+
+            return null;
+        }
     }
 
     protected GVRContext gvrContext;
     protected VolumeType volumeType;
     protected String defaultPath;
+    protected boolean enableUrlLocalCache = false;
 
-    /*package*/ GVRResourceVolume(GVRContext gvrContext, VolumeType volume) {
+    public GVRResourceVolume(GVRContext gvrContext, VolumeType volume) {
         this(gvrContext, volume, null);
     }
 
-    /*package*/ GVRResourceVolume(GVRContext gvrContext, VolumeType volumeType, String defaultPath) {
+    public GVRResourceVolume(GVRContext gvrContext, VolumeType volumeType, String defaultPath) {
         this.gvrContext = gvrContext;
         this.volumeType = volumeType;
         this.defaultPath = defaultPath;
     }
 
+    /* package */ GVRResourceVolume(GVRContext gvrContext,
+            VolumeType volumeType, String defaultPath, boolean cacheEnabled) {
+        this(gvrContext, volumeType, defaultPath);
+        this.enableUrlLocalCache = cacheEnabled;
+    }
+
     /**
-     * Opens a file from the volume. The filePath is relative to the defaultPath.
+     * Opens a file from the volume. The filePath is relative to the
+     * defaultPath.
      *
-     * @param filePath          File path of the resource to open.
+     * @param filePath
+     *            File path of the resource to open.
      *
      * @throws IOException
      */
@@ -63,6 +100,8 @@ public class GVRResourceVolume {
         if (filePath.startsWith(File.separator)) {
             filePath = filePath.substring(File.separator.length());
         }
+
+        filePath = adaptFilePath(filePath);
 
         String path;
         switch (volumeType) {
@@ -83,11 +122,24 @@ public class GVRResourceVolume {
             return new GVRAndroidResource(getFullPath(linuxPath, defaultPath, filePath));
 
         case NETWORK:
-            return new GVRAndroidResource(getFullURL(defaultPath, filePath));
+            return new GVRAndroidResource(gvrContext,
+                    getFullURL(defaultPath, filePath), enableUrlLocalCache);
 
         default:
             throw new IOException(String.format("Unrecognized volumeType %s", volumeType));
         }
+    }
+
+    /**
+     * Adapt a file path to the current file system.
+     * @param filePath The input file path string.
+     * @return File path compatible with the file system of this {@link GVRResourceVolume}.
+     */
+    protected String adaptFilePath(String filePath) {
+        // Convert windows file path to target FS
+        String targetPath = filePath.replaceAll("\\\\", volumeType.getSeparator());
+
+        return targetPath;
     }
 
     private URL getFullURL(String defaultPath, String filePath) throws MalformedURLException {

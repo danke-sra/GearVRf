@@ -21,12 +21,12 @@ import java.util.List;
 import org.gearvrf.GVRContext;
 import org.gearvrf.GVRCursorController;
 import org.gearvrf.GVRScript;
+import org.gearvrf.utility.Log;
 
 import android.content.Context;
 import android.hardware.input.InputManager;
 import android.hardware.input.InputManager.InputDeviceListener;
 
-import android.util.Log;
 import android.util.LongSparseArray;
 import android.util.SparseArray;
 import android.view.InputDevice;
@@ -55,8 +55,15 @@ public abstract class GVRInputManager {
     private static final String TAG = GVRInputManager.class.getSimpleName();
     private final InputManager inputManager;
     private final GVRContext context;
+    private boolean useGazeCursorController;
     private GVRGamepadDeviceManager gamepadDeviceManager;
     private GVRMouseDeviceManager mouseDeviceManager;
+    
+    // maintain one instance of the gazeCursorController
+    private GVRGazeCursorController gazeCursorController;
+
+    private static final long GAZE_CACHED_KEY = GVRDeviceConstants.OCULUS_GEARVR_TOUCHPAD_VENDOR_ID << 32
+            | GVRDeviceConstants.OCULUS_GEARVR_TOUCHPAD_PRODUCT_ID;
 
     /*
      * This class encapsulates the {@link InputManager} to detect all relevant
@@ -76,11 +83,13 @@ public abstract class GVRInputManager {
     // We make use of the vendor and product id to identify a device.
     private final LongSparseArray<GVRBaseController> cache;
 
-    protected GVRInputManager(GVRContext context) {
+    protected GVRInputManager(GVRContext context,
+            boolean useGazeCursorController) {
         Context androidContext = context.getContext();
         inputManager = (InputManager) androidContext
                 .getSystemService(Context.INPUT_SERVICE);
         this.context = context;
+        this.useGazeCursorController = useGazeCursorController;
         inputManager.registerInputDeviceListener(inputDeviceListener, null);
         controllerIds = new SparseArray<GVRBaseController>();
         cache = new LongSparseArray<GVRBaseController>();
@@ -121,6 +130,9 @@ public abstract class GVRInputManager {
         cache.clear();
         mouseDeviceManager.stop();
         gamepadDeviceManager.stop();
+        if(gazeCursorController != null){
+            gazeCursorController.close();
+        }
     }
 
     // returns null if no device is found.
@@ -134,14 +146,36 @@ public abstract class GVRInputManager {
 
     private GVRCursorType getGVRInputDeviceType(InputDevice device) {
         if (device != null) {
-            if ((device.getSources()
-                    & InputDevice.SOURCE_MOUSE) == InputDevice.SOURCE_MOUSE) {
-                return GVRCursorType.MOUSE;
-            } else if ((device.getSources()
-                    & InputDevice.SOURCE_GAMEPAD) == InputDevice.SOURCE_GAMEPAD
-                    || (device.getSources()
-                            & InputDevice.SOURCE_JOYSTICK) == InputDevice.SOURCE_JOYSTICK) {
+            int sources = device.getSources();
+            
+            if ((sources & InputDevice.SOURCE_GAMEPAD) == InputDevice.SOURCE_GAMEPAD
+                    || (sources & InputDevice.SOURCE_JOYSTICK) == InputDevice.SOURCE_JOYSTICK) {
                 return GVRCursorType.CONTROLLER;
+            } 
+            
+            int vendorId = device.getVendorId();
+            int productId = device.getProductId();
+            
+            if ((sources & InputDevice.SOURCE_MOUSE) == InputDevice.SOURCE_MOUSE) {
+                // We do not want to add the Oculus touchpad as a mouse device.
+                if (vendorId == GVRDeviceConstants.OCULUS_GEARVR_TOUCHPAD_VENDOR_ID
+                        && productId == GVRDeviceConstants.OCULUS_GEARVR_TOUCHPAD_PRODUCT_ID) {
+                    return  GVRCursorType.GAZE;
+                            
+                }
+                return GVRCursorType.MOUSE;
+            } 
+            
+            if ((sources & InputDevice.SOURCE_KEYBOARD) == InputDevice.SOURCE_KEYBOARD || 
+                    (sources & InputDevice.SOURCE_TOUCHPAD) == InputDevice.SOURCE_TOUCHPAD) {
+                // Allow gpio keyboard to be a gaze controller if enabled, also allow 
+                // any keyboard/touchpad device without a product/vendor id (assumed to be 
+                // system devices) to control the gaze controller. 
+                if (vendorId == GVRDeviceConstants.GPIO_KEYBOARD_VENDOR_ID
+                        && productId == GVRDeviceConstants.GPIO_KEYBOARD_PRODUCT_ID
+                        || (vendorId == 0  && productId == 0)) {
+                    return  GVRCursorType.GAZE;                 
+                }
             }
         }
         return GVRCursorType.UNKNOWN;
@@ -151,30 +185,41 @@ public abstract class GVRInputManager {
     private long getCacheKey(InputDevice device, GVRCursorType cursorType) {
         if (cursorType != GVRCursorType.UNKNOWN
                 && cursorType != GVRCursorType.EXTERNAL) {
-            int vendorId = device.getVendorId();
-            int productId = device.getProductId();
-
-            // We do not want to add the Oculus touchpad as a mouse device.
-            if (vendorId == GVRDeviceConstants.OCULUS_GEARVR_TOUCHPAD_VENDOR_ID
-                    && productId == GVRDeviceConstants.OCULUS_GEARVR_TOUCHPAD_PRODUCT_ID) {
-                return -1;
-            }
-
             // Sometimes a device shows up using two device ids
             // here we try to show both devices as one using the
             // product and vendor id
+
             long key = device.getVendorId() << 32;
             key = key | device.getProductId();
+
             return key;
         }
-        return -1;
+        return -1; // invalid key
     }
 
     // returns controller if a new device is found
     private GVRBaseController addDevice(int deviceId) {
         InputDevice device = inputManager.getInputDevice(deviceId);
         GVRCursorType cursorType = getGVRInputDeviceType(device);
-        long key = getCacheKey(device, cursorType);
+        
+        if(cursorType == GVRCursorType.GAZE && (false == useGazeCursorController)){
+            return null;
+        }
+
+        long key;
+        if (cursorType == GVRCursorType.GAZE) {
+            // create the controller if there isn't one. 
+            if(gazeCursorController == null){
+                gazeCursorController = new GVRGazeCursorController(context,
+                    GVRCursorType.GAZE);
+            }
+            gazeCursorController.incrementReferenceCount();
+            // use the cached gaze key
+            key = GAZE_CACHED_KEY;
+        } else {
+            key = getCacheKey(device, cursorType);
+        }
+        
         if (key != -1) {
             GVRBaseController controller = cache.get(key);
             if (controller == null) {
@@ -184,6 +229,8 @@ public abstract class GVRInputManager {
                 } else if (cursorType == GVRCursorType.CONTROLLER) {
                     controller = gamepadDeviceManager
                             .getCursorController(context);
+                } else if (cursorType == GVRCursorType.GAZE) {                   
+                    controller = gazeCursorController;
                 }
                 cache.put(key, controller);
                 controllerIds.put(device.getId(), controller);
@@ -217,6 +264,10 @@ public abstract class GVRInputManager {
                     } else if (controller
                             .getCursorType() == GVRCursorType.CONTROLLER) {
                         gamepadDeviceManager.removeCursorController(controller);
+                    } else
+                        if (controller.getCursorType() == GVRCursorType.GAZE) {
+                        ((GVRGazeCursorController) controller)
+                                .decrementReferenceCount();
                     }
                     return controller;
                 }
@@ -243,7 +294,6 @@ public abstract class GVRInputManager {
 
         @Override
         public void onInputDeviceAdded(int deviceId) {
-            Log.d(TAG, "onInputDeviceAdded " + deviceId);
             GVRBaseController controller = addDevice(deviceId);
             if (controller != null) {
                 addCursorController(controller);

@@ -24,7 +24,7 @@ import org.gearvrf.utility.Log;
 import org.gearvrf.debug.GVRConsole;
 
 /** The scene graph */
-public class GVRScene extends GVRHybridObject {
+public class GVRScene extends GVRHybridObject implements PrettyPrint {
     @SuppressWarnings("unused")
     private static final String TAG = Log.tag(GVRScene.class);
 
@@ -86,6 +86,22 @@ public class GVRScene extends GVRHybridObject {
     public void removeSceneObject(GVRSceneObject sceneObject) {
         mSceneObjects.remove(sceneObject);
         NativeScene.removeSceneObject(getNative(), sceneObject.getNative());
+    }
+
+    /**
+     * Remove all scene objects.
+     */
+    public void removeAllSceneObjects() {
+        mSceneObjects.clear();
+        NativeScene.removeAllSceneObjects(getNative());
+    }
+
+    /**
+     * Clears the scene and resets it to initial state. Currently, it only
+     * removes all scene objects.
+     */
+    public void clear() {
+        removeAllSceneObjects();
     }
 
     /**
@@ -334,6 +350,44 @@ public class GVRScene extends GVRHybridObject {
             NativeScene.attachDirectionalLight(getNative(), 0);
         }
     }
+
+    /**
+     * Prints the {@link GVRScene} object with indentation.
+     *
+     * @param sb
+     *         The {@code StringBuffer} object to receive the output.
+     *
+     * @param indent
+     *         Size of indentation in number of spaces.
+     */
+    @Override
+    public void prettyPrint(StringBuffer sb, int indent) {
+        sb.append(Log.getSpaces(indent));
+        sb.append(getClass().getSimpleName());
+        sb.append(System.lineSeparator());
+
+        sb.append(Log.getSpaces(indent + 2));
+        if (mMainCameraRig == null) {
+            sb.append("MainCameraRig: null");
+            sb.append(System.lineSeparator());
+        } else {
+            sb.append("MainCameraRig:");
+            sb.append(System.lineSeparator());
+            mMainCameraRig.prettyPrint(sb, indent + 4);
+        }
+
+        // Show all scene objects
+        for (GVRSceneObject child : mSceneObjects) {
+            child.prettyPrint(sb, indent + 2);
+        }
+    }
+
+    @Override
+    public String toString() {
+        StringBuffer sb = new StringBuffer();
+        prettyPrint(sb, 0);
+        return sb.toString();
+    }
 }
 
 class NativeScene {
@@ -343,6 +397,8 @@ class NativeScene {
     static native void addSceneObject(long scene, long sceneObject);
 
     static native void removeSceneObject(long scene, long sceneObject);
+
+    static native void removeAllSceneObjects(long scene);
 
     public static native void setFrustumCulling(long scene, boolean flag);
 

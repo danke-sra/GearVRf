@@ -20,6 +20,7 @@ import java.util.Map;
 
 import org.gearvrf.GVRCursorController.ActiveState;
 import org.gearvrf.utility.Log;
+import org.joml.Vector3f;
 
 /**
  * This class manages {@link GVRBaseSensor}s
@@ -74,21 +75,18 @@ class SensorManager {
         }
 
         // Well at least we are not comparing against all scene objects.
-        if (objectSensor != null && objectSensor.isEnabled()
-                && object.getRenderData() != null
-                && object.getRenderData().getMesh() != null) {
+        if (objectSensor != null && objectSensor.isEnabled() && object.hasMesh()) {
 
             /**
              * Compare ray against the hierarchical bounding volume and then add
              * the children accordingly.
              */
+            Vector3f ray = controller.getRay();
             if (object.intersectsBoundingVolume(ORIGIN[0], ORIGIN[1], ORIGIN[2],
-                    controller.getRayX(), controller.getRayY(),
-                    controller.getRayZ())) {
+                    ray.x, ray.y, ray.z)) {
                 float[] hitPoint = GVRPicker.pickSceneObjectAgainstBoundingBox(
-                        object, ORIGIN[0], ORIGIN[1], ORIGIN[2],
-                        controller.getRayX(), controller.getRayY(),
-                        controller.getRayZ());
+                        object, ORIGIN[0], ORIGIN[1], ORIGIN[2], ray.x, ray.y,
+                        ray.z);
 
                 if (hitPoint != null) {
                     objectSensor.addSceneObject(controller, object, hitPoint);

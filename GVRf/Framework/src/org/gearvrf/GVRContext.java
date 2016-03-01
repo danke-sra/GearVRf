@@ -26,6 +26,7 @@ import org.gearvrf.GVRAndroidResource.BitmapTextureCallback;
 import org.gearvrf.GVRAndroidResource.CompressedTextureCallback;
 import org.gearvrf.GVRAndroidResource.MeshCallback;
 import org.gearvrf.GVRAndroidResource.TextureCallback;
+import org.gearvrf.GVRHybridObject.NativeCleanupHandler;
 import org.gearvrf.animation.GVRAnimation;
 import org.gearvrf.animation.GVRAnimationEngine;
 import org.gearvrf.asynchronous.GVRAsynchronousResourceLoader;
@@ -637,7 +638,34 @@ public abstract class GVRContext {
      *
      */
     public GVRSceneObject loadModelFromURL(String urlString) throws IOException {
-        return loadModelFromURL(urlString, GVRImportSettings.getRecommendedSettings());
+        return loadModelFromURL(urlString, false);
+    }
+
+    /**
+     * Simple, high-level method to load a scene object {@link GVRModelSceneObject} from
+     * a 3D model from a URL with an option to store it into local file cache for future use.
+     *
+     * @param urlString
+     *            A URL string pointing to where the model file is located.
+     *
+     * @param cacheEnabled
+     *           An option that a developer can choose for the loading process for the trade off 
+     *           between performance and consistency(or security):
+     *           True: Download and store the file locally in this app's cache directory and
+     *                  load from the cache in future uses;
+     *           false: Don't keep local copy and only do online streaming for loading everytime
+     *           
+     * @return A {@link GVRModelSceneObject} that contains the meshes with textures and bones
+     * and animations.
+     *
+     * @throws IOException
+     *             File does not exist or cannot be read
+     *
+     */
+    public GVRSceneObject loadModelFromURL(String urlString, boolean cacheEnabled) throws IOException {
+        return GVRImporter.loadJassimpModel(this, urlString,
+                GVRResourceVolume.VolumeType.NETWORK,
+                GVRImportSettings.getRecommendedSettings(), cacheEnabled);
     }
 
     /**
@@ -954,7 +982,7 @@ public abstract class GVRContext {
      * <p>
      * Note that this method may take hundreds of milliseconds to return: unless
      * the cube map is quite tiny, you probably don't want to call this directly
-     * from your {@link GVRScript#onStep() onStsep()} callback as that is called
+     * from your {@link GVRScript#onStep() onStep()} callback as that is called
      * once per frame, and a long call will cause you to miss frames.
      * 
      * @param resourceArray
@@ -1003,13 +1031,13 @@ public abstract class GVRContext {
      * @since 1.6.5
      * 
      */
-    private void assertGLThread() {
-
+    public void assertGLThread() {
         if (Thread.currentThread().getId() != mGLThreadID) {
-            throw new RuntimeException(
+            RuntimeException e = new RuntimeException(
                     "Should not run GL functions from a non-GL thread!");
+            e.printStackTrace();
+            throw e;
         }
-
     }
 
     /*
@@ -2284,4 +2312,46 @@ public abstract class GVRContext {
      * @since 1.6.8
      */
     public abstract void captureScreen3D(GVRScreenshot3DCallback callback);
+
+    private final GVRContextPrivate mContextPrivate = new GVRContextPrivate();
+
+    final void releaseNative(final GVRHybridObject hybridObject) {
+        mContextPrivate.releaseNative(hybridObject);
+    }
+
+    final void registerHybridObject(final GVRHybridObject hybridObject, final long nativePointer,
+            final List<NativeCleanupHandler> cleanupHandlers) {
+        mContextPrivate.registerHybridObject(hybridObject, nativePointer, cleanupHandlers);
+    }
+
+    private Object mTag;
+
+    /**
+     * Sets the tag associated with this context.
+     * 
+     * Tags can be used to store data within the context without
+     * resorting to another data structure.
+     *
+     * @param tag an object to associate with this context
+     * 
+     * @see #getTag()
+     * @since 3.0.0
+     */
+    public void setTag(Object tag) {
+        mTag = tag;
+    }
+
+    /**
+     * Returns this context's tag.
+     * 
+     * @return the Object stored in this context as a tag,
+     *         or {@code null} if not set
+     * 
+     * @see #setTag(Object)
+     * @since 3.0.0
+     */
+    public Object getTag() {
+        return mTag;
+    }
+
 }

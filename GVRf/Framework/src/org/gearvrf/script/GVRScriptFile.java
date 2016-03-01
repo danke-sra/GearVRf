@@ -49,25 +49,29 @@ public abstract class GVRScriptFile {
     protected final GVRContext mGvrContext;
     protected final String mLanguage;
 
+    // Lock for engine access and mBadFunctions
     protected final Object mEngineLock = new Object();
     protected final ScriptEngine mLocalEngine;
     private Set<String> mBadFunctions;
 
+    // Lock for mScriptText and dirty flag
     protected final Object mScriptTextLock = new Object();
     protected String mScriptText;
     protected boolean mScriptTextDirty;
 
-    // Optimization
+    // Caching parameter names to reduce object creation
     private static final int sNumOfCachedParamNames = 10;
     private static String[] sCachedParamName;
 
     static {
+        // Generate parameter names, arg0, arg1, ...
         sCachedParamName = new String[sNumOfCachedParamNames];
         for (int i = 0; i < sNumOfCachedParamNames; ++i) {
             sCachedParamName[i] = getDefaultParamNameRaw(i);
         }
     }
 
+    // Cache for function invocation statements
     protected final Map<String, String> mInvokeStatementCache;
 
     /**
@@ -174,6 +178,7 @@ public abstract class GVRScriptFile {
         try {
             mLocalEngine.eval(statement);
         } catch (ScriptException e) {
+            // The function is either undefined or throws, avoid invoking it later
             addBadFunction(funcName);
             return false;
         } finally {
@@ -183,7 +188,7 @@ public abstract class GVRScriptFile {
         return true;
     }
 
-    private void resetBadFunction() {
+    private void resetBadFunctions() {
         if (mBadFunctions == null) {
             return;
         }
@@ -218,8 +223,8 @@ public abstract class GVRScriptFile {
             if (mScriptTextDirty) {
                 mScriptTextDirty = false;
 
-                // Remove marked bad function
-                resetBadFunction();
+                // Remove marked bad functions
+                resetBadFunctions();
 
                 try {
                     mLocalEngine.eval(mScriptText);
@@ -257,12 +262,9 @@ public abstract class GVRScriptFile {
     private final String getInvokeStatementCached(String eventName, Object[] params) {
         synchronized (mInvokeStatementCache) {
             String invokeStatement = mInvokeStatementCache.get(eventName);
-
             if (invokeStatement == null) {
                 invokeStatement = getInvokeStatement(eventName, params);
                 mInvokeStatementCache.put(eventName, invokeStatement);
-            } else {
-                invokeStatement = mInvokeStatementCache.get(eventName);
             }
 
             return invokeStatement;

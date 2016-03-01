@@ -34,6 +34,7 @@
 
 #include "objects/components/camera.h"
 #include "objects/components/directional_light.h"
+#include "engine/memory/gl_delete.h"
 
 namespace gvr {
 class GLProgram;
@@ -117,6 +118,8 @@ private:
     GLTexture* texture_camera_depth;
     GLTexture* texture_camera_color;
     DirectionalLight* cameraLight;
+
+    GlDelete* deleter_;
 };
 
 }
