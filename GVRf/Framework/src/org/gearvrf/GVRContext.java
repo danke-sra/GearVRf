@@ -67,6 +67,18 @@ public abstract class GVRContext {
      * Fields and constants
      */
 
+    // Debug and log level settings
+
+    /**
+     * Set to true for displaying statistics line.
+     */
+    public static boolean DEBUG_STATS = false;
+
+    /**
+     * Period of statistic log in millliseconds.
+     */
+    public static long DEBUG_STATS_PERIOD_MS = 1000;
+
     // Priorities constants, for asynchronous loading
 
     /**
@@ -877,8 +889,6 @@ public abstract class GVRContext {
     public GVRBitmapTexture loadTexture(String fileName,
             GVRTextureParameters textureParameters) {
 
-        assertGLThread();
-
         if (fileName.endsWith(".png")) { // load png directly to texture
             return new GVRBitmapTexture(this, fileName);
         }
@@ -960,8 +970,6 @@ public abstract class GVRContext {
 
         GVRTexture texture = textureCache.get(resource);
         if (texture == null) {
-            assertGLThread();
-
             Bitmap bitmap = GVRAsynchronousResourceLoader.decodeStream(
                     resource.getStream(), false);
             resource.closeStream();
@@ -1008,8 +1016,6 @@ public abstract class GVRContext {
     public GVRCubemapTexture loadCubemapTexture(
             GVRAndroidResource[] resourceArray,
             GVRTextureParameters textureParameters) {
-
-        assertGLThread();
 
         if (resourceArray.length != 6) {
             return null;
@@ -1899,6 +1905,30 @@ public abstract class GVRContext {
         return GVRAsynchronousResourceLoader.loadFutureCompressedCubemapTexture(this,
                 textureCache, resource, DEFAULT_PRIORITY,
                 GVRCubemapTexture.faceIndexMap);
+    }
+
+    /**
+     * Loads atlas information file placed in the assets folder.
+     *
+     * Atlas information file contains in UV space the information of offset and
+     * scale for each mesh mapped in some atlas texture.
+     * The content of the file is at json format like:
+     *
+     * [ {name: SUN, offset.x: 0.9, offset.y: 0.9, scale.x: 0.5, scale.y: 0.5},
+     * {name: EARTH, offset.x: 0.5, offset.y: 0.9, scale.x: 0.5, scale.y: 0.5} ]
+     *
+     * @param resource
+     *            A stream containing a text file on JSON format.
+     *
+     * @return List of atlas information load.
+     */
+    public List<GVRAtlasInformation> loadTextureAtlasInformation(GVRAndroidResource resource) {
+
+        List<GVRAtlasInformation> atlasInformation
+                = GVRAsynchronousResourceLoader.loadAtlasInformation(resource.getStream());
+        resource.closeStream();
+
+        return atlasInformation;
     }
 
     /**

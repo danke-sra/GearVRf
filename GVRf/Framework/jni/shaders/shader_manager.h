@@ -36,6 +36,7 @@
 #include "shaders/material/assimp_shader.h"
 #include "shaders/material/unlit_fbo_shader.h"
 #include "shaders/posteffect/shadow_shader.h"
+#include "shaders/material/lightmap_shader.h"
 #include "util/gvr_log.h"
 
 namespace gvr {
@@ -47,7 +48,7 @@ public:
             oes_shader_(), oes_horizontal_stereo_shader_(), oes_vertical_stereo_shader_(),
             cubemap_shader_(), cubemap_reflection_shader_(), texture_shader_(), assimp_shader_(),
             unlit_fbo_shader_(),
-            shadow_shader_(), external_renderer_shader_(), error_shader_(),
+            shadow_shader_(), lightmap_shader_(), external_renderer_shader_(), error_shader_(),
             latest_custom_shader_id_(INITIAL_CUSTOM_SHADER_INDEX), custom_shaders_() {
     }
     ~ShaderManager() {
@@ -62,6 +63,7 @@ public:
         delete external_renderer_shader_;
         delete assimp_shader_;
         delete shadow_shader_;
+        delete lightmap_shader_;
         delete error_shader_;
         delete unlit_fbo_shader_;
         delete shadow_shader_;
@@ -139,6 +141,14 @@ public:
         }
         return shadow_shader_;
     }
+
+    LightMapShader* getLightMapShader() {
+        if (!lightmap_shader_) {
+            lightmap_shader_ = new LightMapShader();
+        }
+        return lightmap_shader_;
+    }
+
     ErrorShader* getErrorShader() {
         if (!error_shader_) {
             error_shader_ = new ErrorShader();
@@ -190,6 +200,7 @@ private:
     AssimpShader* assimp_shader_;
     UnlitFboShader* unlit_fbo_shader_;
     ShadowShader* shadow_shader_;
+    LightMapShader* lightmap_shader_;
     ErrorShader* error_shader_;
     int latest_custom_shader_id_;
     std::map<int, CustomShader*> custom_shaders_;

@@ -36,6 +36,9 @@ import org.gearvrf.animation.GVRAnimation;
 import org.gearvrf.animation.GVROnFinish;
 import org.gearvrf.animation.GVROpacityAnimation;
 import org.gearvrf.asynchronous.GVRAsynchronousResourceLoader;
+import org.gearvrf.debug.GVRFPSTracer;
+import org.gearvrf.debug.GVRMethodCallTracer;
+import org.gearvrf.debug.GVRStatsLine;
 import org.gearvrf.script.GVRScriptManager;
 import org.gearvrf.utility.ImageUtils;
 import org.gearvrf.utility.Log;
@@ -129,6 +132,17 @@ class GVRViewManager extends GVRContext implements RotationSensorListener {
     private native void readRenderResultNative(long renderTexture,
             Object readbackBuffer);
 
+    // Statistic debug info
+    private GVRStatsLine mStatsLine;
+    private GVRFPSTracer mFPSTracer;
+    private GVRMethodCallTracer mTracerBeforeDrawEyes;
+    private GVRMethodCallTracer mTracerAfterDrawEyes;
+    private GVRMethodCallTracer mTracerDrawEyes;
+    private GVRMethodCallTracer mTracerDrawEyes1;
+    private GVRMethodCallTracer mTracerDrawEyes2;
+    private GVRMethodCallTracer mTracerDrawFrame;
+    private GVRMethodCallTracer mTracerDrawFrameGap;
+
     /**
      * Constructs GVRViewManager object with GVRScript which controls GL
      * activities
@@ -189,6 +203,27 @@ class GVRViewManager extends GVRContext implements RotationSensorListener {
 
         mEventManager = new GVREventManager(this);
         mScriptManager = new GVRScriptManager(this);
+
+        // Debug statistics
+        mStatsLine = new GVRStatsLine("gvrf-stats");
+
+        mFPSTracer = new GVRFPSTracer("DrawFPS");
+        mTracerDrawFrame = new GVRMethodCallTracer("drawFrame");
+        mTracerDrawFrameGap = new GVRMethodCallTracer("drawFrameGap");
+        mTracerBeforeDrawEyes = new GVRMethodCallTracer("beforeDrawEyes");
+        mTracerDrawEyes = new GVRMethodCallTracer("drawEyes");
+        mTracerDrawEyes1 = new GVRMethodCallTracer("drawEyes1");
+        mTracerDrawEyes2 = new GVRMethodCallTracer("drawEyes2");
+        mTracerAfterDrawEyes = new GVRMethodCallTracer("afterDrawEyes");
+
+        mStatsLine.addColumn(mFPSTracer.getStatColumn());
+        mStatsLine.addColumn(mTracerDrawFrame.getStatColumn());
+        mStatsLine.addColumn(mTracerDrawFrameGap.getStatColumn());
+        mStatsLine.addColumn(mTracerBeforeDrawEyes.getStatColumn());
+        mStatsLine.addColumn(mTracerDrawEyes.getStatColumn());
+        mStatsLine.addColumn(mTracerDrawEyes1.getStatColumn());
+        mStatsLine.addColumn(mTracerDrawEyes2.getStatColumn());
+        mStatsLine.addColumn(mTracerAfterDrawEyes.getStatColumn());
     }
 
     /*
@@ -294,7 +329,20 @@ class GVRViewManager extends GVRContext implements RotationSensorListener {
     }
 
     void beforeDrawEyes() {
+        if (DEBUG_STATS) {
+            mStatsLine.startLine();
+
+            mTracerDrawFrame.enter();
+            mTracerDrawFrameGap.leave();
+
+            mTracerBeforeDrawEyes.enter();
+        }
+
         mFrameHandler.beforeDrawEyes();
+
+        if (DEBUG_STATS) {
+            mTracerBeforeDrawEyes.leave();
+        }        
     }
 
     @Override
@@ -473,6 +521,10 @@ class GVRViewManager extends GVRContext implements RotationSensorListener {
             GVRCameraRig mainCameraRig = mMainScene.getMainCameraRig();
 
             if (eye == 1) {
+                if (DEBUG_STATS) {
+                    mTracerDrawEyes1.enter();
+                }
+
                 GVRCamera rightCamera = mainCameraRig.getRightCamera();
                 renderCamera(mActivity.getNative(), mMainScene, rightCamera,
                         mRenderBundle);
@@ -486,7 +538,17 @@ class GVRViewManager extends GVRContext implements RotationSensorListener {
                 }
 
                 mActivity.setCamera(rightCamera);
+
+                if (DEBUG_STATS) {
+                    mTracerDrawEyes1.leave();
+                    mTracerDrawEyes.leave();
+                }
             } else {
+                if (DEBUG_STATS) {
+                    mTracerDrawEyes.enter(); // this eye is drawn first
+                    mTracerDrawEyes2.enter();
+                }
+
                 // if mScreenshotCenterCallback is not null, capture center eye
                 if (mScreenshotCenterCallback != null) {
                     GVRPerspectiveCamera centerCamera = mainCameraRig.getCenterCamera();
@@ -533,6 +595,10 @@ class GVRViewManager extends GVRContext implements RotationSensorListener {
                 }
 
                 mActivity.setCamera(leftCamera);
+
+                if (DEBUG_STATS) {
+                    mTracerDrawEyes2.leave();
+                }
             }
         }
     }
@@ -550,8 +616,13 @@ class GVRViewManager extends GVRContext implements RotationSensorListener {
     }
 
     void afterDrawEyes() {
+        if (DEBUG_STATS) {
+            // Time afterDrawEyes from here
+            mTracerAfterDrawEyes.enter();
+        }
+
         // Execute post-rendering tasks (after drawing eyes, but
-        // before after draw eye handlers)
+        // before afterDrawEyes handlers)
         synchronized (mRunnablesPostRender) {
             for (Iterator<Map.Entry<Runnable, Integer>> it = mRunnablesPostRender.entrySet().iterator();
                     it.hasNext(); ) {
@@ -566,6 +637,19 @@ class GVRViewManager extends GVRContext implements RotationSensorListener {
         }
 
         mFrameHandler.afterDrawEyes();
+
+        if (DEBUG_STATS) {
+            mTracerAfterDrawEyes.leave();
+
+            mTracerDrawFrame.leave();
+            mTracerDrawFrameGap.enter();
+
+            mFPSTracer.tick();
+            mStatsLine.printLine(DEBUG_STATS_PERIOD_MS);
+
+            mMainScene.addStatMessage(System.lineSeparator() +
+                                      mStatsLine.getStats(GVRStatsLine.FORMAT.MULTILINE));
+        }
     }
 
     /*

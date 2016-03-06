@@ -194,7 +194,7 @@ void Renderer::renderCamera(Scene* scene, Camera* camera, int framebufferId,
 
     bool renderShadow = cameraLight; // TODO reader from scene;
 
-    if ((framebufferId != 0) && !renderShadow) {
+    if (!renderShadow) {
         renderCamera(scene, camera, framebufferId, viewportX, viewportY,
                 viewportWidth, viewportHeight, shader_manager,
                 post_effect_shader_manager, post_effect_render_texture_a,
@@ -569,6 +569,7 @@ bool Renderer::isShader3d(const Material* curr_material) {
     case Material::ShaderType::TEXTURE_SHADER:
     case Material::ShaderType::EXTERNAL_RENDERER_SHADER:
     case Material::ShaderType::ASSIMP_SHADER:
+    case Material::ShaderType::LIGHTMAP_SHADER:
     default:
         shaders3d = true;
         break;
@@ -770,6 +771,9 @@ void Renderer::renderRenderData(RenderData* render_data,
                             case Material::ShaderType::UNLIT_FBO_SHADER:
                                 shader_manager->getUnlitFboShader()->render(
                                         mvp_matrix, render_data, curr_material);
+                            case Material::ShaderType::LIGHTMAP_SHADER:
+                                shader_manager->getLightMapShader()->render(mvp_matrix,
+                                        render_data, curr_material);
                                 break;
                             default:
                                 shader_manager->getCustomShader(
