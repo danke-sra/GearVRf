@@ -173,6 +173,7 @@ final class GVRImporter {
                 GVRAndroidResource resource = uncachedIO.getResourceVolume().openResource(path);
                 GVRByteArray byteArray = cache.get(resource);
                 if (byteArray == null) {
+                    resource.closeStream(); // needed to avoid hanging
                     byteArray = GVRByteArray.wrap(uncachedIO.read(path));
                     cache.put(resource, byteArray);
                 }

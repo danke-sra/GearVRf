@@ -198,12 +198,18 @@ public class GVRAndroidResource {
 
         public URLBufferedInputStream(URL url) throws IOException {
             this.url = url;
-            in = new BufferedInputStream(url.openStream());
+            in = new BufferedInputStream(url.openStream(), 8192);
         }
 
         @Override
         public boolean markSupported() {
             return true;
+        }
+
+        @Override
+        public void close() throws IOException {
+            super.close();
+            in.close();
         }
 
         @Override
