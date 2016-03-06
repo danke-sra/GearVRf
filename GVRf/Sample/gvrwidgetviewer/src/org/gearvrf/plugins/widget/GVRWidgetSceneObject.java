@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-package org.gearvrf.scene_objects;
+package org.gearvrf.plugins.widget;
 
 import org.gearvrf.GVRContext;
 import org.gearvrf.GVRExternalTexture;

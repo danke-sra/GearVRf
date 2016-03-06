@@ -16,15 +16,10 @@
 package org.gearvrf.plugins.widget;
 
 import org.gearvrf.GVRSceneObject;
-import org.gearvrf.scene_objects.GVRWidgetSceneObject;
 
-import android.content.Context;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
-import com.badlogic.gdx.Application;
-import com.badlogic.gdx.backends.android.AndroidApplicationConfiguration;
 import com.badlogic.gdx.backends.android.AndroidInput;
 
 /**

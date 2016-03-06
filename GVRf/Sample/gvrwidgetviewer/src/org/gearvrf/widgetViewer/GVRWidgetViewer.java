@@ -168,6 +168,8 @@ public class GVRWidgetViewer extends GVRWidgetPluginActivity implements
         // webview.measure(500, 500);
         webview.setLayoutMode(LayoutParams.WRAP_CONTENT);
         widget = new MyGdxWidget();
+        initializeWidget(widget);
+
         // game = new SuperJumper();
         // mView =
         // initialize(new MyGdxGame(), new AndroidApplicationConfiguration());
@@ -356,32 +358,4 @@ public class GVRWidgetViewer extends GVRWidgetPluginActivity implements
     protected boolean hideStatusBar = false;
     private int wasFocusChanged = -1;
     private boolean isWaitingForAudio = false;
-
-    @Override
-    protected void onPause() {
-
-        super.onPause();
-    }
-
-    @Override
-    protected void onResume() {
-        initializeWidget(widget);
-        super.onResume();
-        // addContentView(mPlugin.initializeWidget(game), createLayoutParams());
-
-        /*
-         * Thread thread = new Thread() {
-         * 
-         * @Override public void run() { try { while(mScript.eglContext == null)
-         * { sleep(100); // handler.post(this); }
-         * 
-         * runOnUiThread(new Runnable() { public void run() { resumeL(); } });
-         * 
-         * } catch (InterruptedException e) { e.printStackTrace(); } } };
-         * 
-         * thread.start();
-         */
-
-    }
-
 }

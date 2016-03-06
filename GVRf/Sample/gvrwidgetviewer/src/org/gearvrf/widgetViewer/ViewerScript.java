@@ -15,53 +15,40 @@
 
 package org.gearvrf.widgetViewer;
 
-import java.io.File;
 import java.io.IOException;
 
-import javax.microedition.khronos.egl.EGL10;
-import javax.microedition.khronos.opengles.GL10;
-
-import org.gearvrf.*;
+import org.gearvrf.GVRActivity;
+import org.gearvrf.GVRAndroidResource;
+import org.gearvrf.GVRContext;
+import org.gearvrf.GVREyePointeeHolder;
+import org.gearvrf.GVRMaterial;
 import org.gearvrf.GVRMaterial.GVRShaderType;
+import org.gearvrf.GVRMesh;
+import org.gearvrf.GVRMeshEyePointee;
+import org.gearvrf.GVRPicker;
+import org.gearvrf.GVRRenderData;
 import org.gearvrf.GVRRenderData.GVRRenderMaskBit;
-
+import org.gearvrf.GVRScene;
+import org.gearvrf.GVRSceneObject;
+import org.gearvrf.GVRScript;
+import org.gearvrf.GVRSharedTexture;
+import org.gearvrf.GVRTexture;
 import org.gearvrf.plugins.widget.GVRWidgetPluginActivity;
+import org.gearvrf.plugins.widget.GVRWidgetSceneObject;
 import org.gearvrf.plugins.widget.GVRWidgetSceneObjectMeshInfo;
-import org.gearvrf.scene_objects.GVRWidgetSceneObject;
-//import org.gearvrf.scene_objects.GVRListViewSceneObject;
-import org.gearvrf.scene_objects.GVRWebViewSceneObject;
-
-import javax.microedition.khronos.egl.EGL10;
-import javax.microedition.khronos.egl.EGLConfig;
-import javax.microedition.khronos.egl.EGLContext;
-import javax.microedition.khronos.egl.EGLDisplay;
-import javax.microedition.khronos.egl.EGLSurface;
 
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Matrix;
-import android.graphics.Paint;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuff.Mode;
 import android.graphics.SurfaceTexture;
-import android.graphics.drawable.Drawable;
-
-import android.opengl.GLES11Ext;
 import android.opengl.GLES20;
-import android.opengl.GLSurfaceView;
 import android.os.SystemClock;
-import android.transition.Scene;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.View;
-import android.view.View.MeasureSpec;
-import android.webkit.WebChromeClient;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
-import android.widget.ListView;
+//import org.gearvrf.scene_objects.GVRListViewSceneObject;
 
 public class ViewerScript extends GVRScript {
 
@@ -155,7 +142,6 @@ public class ViewerScript extends GVRScript {
     // public float accrotatey = 0.0f;
     // public float accrotatez = 0.0f;
     public boolean resetrotate = false;
-    public EGLContext eglContext;
     GVRTexture mBlueTex;
     GVRTexture mBlackTex;
     GVRTexture mGreenTex;

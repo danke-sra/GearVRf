@@ -16,15 +16,15 @@
 package org.gearvrf.plugins.widget;
 
 import java.lang.reflect.Method;
-import java.util.Objects;
 
+import javax.microedition.khronos.egl.EGL10;
 import javax.microedition.khronos.egl.EGLContext;
 
 import org.gearvrf.GVRActivity;
+import org.gearvrf.GVRContext;
 import org.gearvrf.GVRSceneObject;
 import org.gearvrf.GVRScript;
-import org.gearvrf.plugins.GVRPlugin;
-import org.gearvrf.scene_objects.GVRWidgetSceneObject;
+import org.gearvrf.IScriptEvents;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
@@ -36,8 +36,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Debug;
 import android.os.Handler;
-import android.util.Log;
-import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
@@ -48,12 +46,9 @@ import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Audio;
 import com.badlogic.gdx.Files;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Graphics;
 import com.badlogic.gdx.LifecycleListener;
 import com.badlogic.gdx.Net;
 import com.badlogic.gdx.Preferences;
-import com.badlogic.gdx.Application.ApplicationType;
-import com.badlogic.gdx.backends.android.AndroidApplication;
 import com.badlogic.gdx.backends.android.AndroidApplicationBase;
 import com.badlogic.gdx.backends.android.AndroidApplicationConfiguration;
 import com.badlogic.gdx.backends.android.AndroidAudio;
@@ -76,7 +71,7 @@ import com.badlogic.gdx.utils.GdxNativesLoader;
  * GVRWidgets
  */
 public class GVRWidgetPluginActivity extends GVRActivity implements
-        AndroidApplicationBase, GVRPlugin {
+        AndroidApplicationBase {
 
     static {
         GdxNativesLoader.load();
@@ -95,6 +90,9 @@ public class GVRWidgetPluginActivity extends GVRActivity implements
     protected AndroidNet mNet;
     protected GVRScript mScript;
     protected GVRWidget mWidget;
+
+    // EGL
+    protected EGLContext mEGLContext;
 
     protected ApplicationListener mListener;
     public Handler mHandler;
@@ -543,42 +541,6 @@ public class GVRWidgetPluginActivity extends GVRActivity implements
         return this.mHandler;
     }
 
-    @Override
-    public void init(Objects... args) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void destroy() {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void onCreateCallback(Bundle savedInstanceState) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void onResumeCallback() {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void onPauseCallback() {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void onDestroyCallback() {
-        // TODO Auto-generated method stub
-
-    }
-
     public View getWidgetView() {
         return mWidgetView;
     }
@@ -591,7 +553,6 @@ public class GVRWidgetPluginActivity extends GVRActivity implements
         return mViewHeight;
     }
 
-    @Override
     public boolean isInitialised() {
         return mWidget.isInitialised();
     }
@@ -606,7 +567,6 @@ public class GVRWidgetPluginActivity extends GVRActivity implements
 
     public void setCurrentScript(GVRScript script) {
         mScript = script;
-        mScript.setCurrentPlugin(this);
     }
 
     public void setPickedObject(GVRSceneObject obj) {
@@ -625,7 +585,7 @@ public class GVRWidgetPluginActivity extends GVRActivity implements
             public void run() {
                 synchronized (mSync) {
                     try {
-                        while (mScript.getEGLContext() == null) {
+                        while (mEGLContext == null) {
                             mSync.wait();
                         }
                         runOnUiThread(new Runnable() {
@@ -647,7 +607,7 @@ public class GVRWidgetPluginActivity extends GVRActivity implements
 
     private void doResume(GVRWidget widget) {
         mWidgetView = (GLSurfaceView) initializeForView(widget,
-                new AndroidApplicationConfiguration(), mScript.getEGLContext());
+                new AndroidApplicationConfiguration(), mEGLContext);
 
         addContentView(mWidgetView, createLayoutParams());
         Gdx.app = this;
@@ -684,18 +644,14 @@ public class GVRWidgetPluginActivity extends GVRActivity implements
         return false;
     }
 
-    @Override
     public void syncNotify() {
-        // TODO Auto-generated method stub
         synchronized (mSync) {
             mSync.notifyAll();
         }
 
     }
 
-    @Override
     public void syncWait() {
-        // TODO Auto-generated method stub
         synchronized (mSync) {
             try {
                 mSync.wait();
@@ -754,4 +710,35 @@ public class GVRWidgetPluginActivity extends GVRActivity implements
 
     }
 
+    private void initWithPlugin() throws Throwable {
+        mEGLContext = ((EGL10)(EGLContext.getEGL())).eglGetCurrentContext();
+        syncNotify();
+
+        while (!isInitialised()) {
+            syncWait();
+        }
+    }
+
+    private IScriptEvents pluginListener = new IScriptEvents() {
+        @Override
+        public void onInit(GVRContext gvrContext) throws Throwable {
+            initWithPlugin();
+        }
+
+        @Override
+        public void onAfterInit() {
+        }
+
+        @Override
+        public void onStep() {
+        }
+    };
+
+    @Override
+    public void setScript(GVRScript gvrScript, String distortionDataFileName) {
+        // Add plugin listeners to the script
+        gvrScript.getEventReceiver().addListener(pluginListener);
+
+        super.setScript(gvrScript, distortionDataFileName);
+    }
 }
