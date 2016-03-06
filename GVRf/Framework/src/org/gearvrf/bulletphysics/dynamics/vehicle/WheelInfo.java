@@ -23,12 +23,11 @@
 
 package org.gearvrf.bulletphysics.dynamics.vehicle;
 
-import cz.advel.stack.Stack;
-
 import javax.vecmath.Vector3f;
 
 import org.gearvrf.bulletphysics.dynamics.RigidBody;
 import org.gearvrf.bulletphysics.linearmath.Transform;
+import org.gearvrf.bulletphysics.stack.Stack;
 
 /**
  * WheelInfo contains information per wheel about friction and suspension.

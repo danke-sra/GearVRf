@@ -26,14 +26,13 @@
 
 package org.gearvrf.bulletphysics.collision.broadphase;
 
-import cz.advel.stack.Stack;
-
 import javax.vecmath.Vector3f;
 
 import org.gearvrf.bulletphysics.BulletStats;
 import org.gearvrf.bulletphysics.collision.broadphase.AxisSweep3Internal.Handle;
 import org.gearvrf.bulletphysics.linearmath.MiscUtil;
 import org.gearvrf.bulletphysics.linearmath.VectorUtil;
+import org.gearvrf.bulletphysics.stack.Stack;
 import org.gearvrf.bulletphysics.util.ObjectArrayList;
 
 /**

@@ -23,8 +23,6 @@
 
 package org.gearvrf.bulletphysics.collision.dispatch;
 
-import cz.advel.stack.Stack;
-
 import javax.vecmath.Vector3f;
 
 import org.gearvrf.bulletphysics.collision.broadphase.CollisionAlgorithm;
@@ -36,6 +34,7 @@ import org.gearvrf.bulletphysics.collision.shapes.CollisionShape;
 import org.gearvrf.bulletphysics.collision.shapes.TriangleCallback;
 import org.gearvrf.bulletphysics.collision.shapes.TriangleShape;
 import org.gearvrf.bulletphysics.linearmath.Transform;
+import org.gearvrf.bulletphysics.stack.Stack;
 
 /**
  * For each triangle in the concave mesh that overlaps with the AABB of a convex

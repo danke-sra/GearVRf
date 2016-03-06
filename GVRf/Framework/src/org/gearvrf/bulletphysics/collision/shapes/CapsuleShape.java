@@ -23,8 +23,6 @@
 
 package org.gearvrf.bulletphysics.collision.shapes;
 
-import cz.advel.stack.Stack;
-
 import javax.vecmath.Matrix3f;
 import javax.vecmath.Vector3f;
 
@@ -33,6 +31,7 @@ import org.gearvrf.bulletphysics.collision.broadphase.BroadphaseNativeType;
 import org.gearvrf.bulletphysics.linearmath.MatrixUtil;
 import org.gearvrf.bulletphysics.linearmath.Transform;
 import org.gearvrf.bulletphysics.linearmath.VectorUtil;
+import org.gearvrf.bulletphysics.stack.Stack;
 
 /**
  * CapsuleShape represents a capsule around the Y axis, there is also the

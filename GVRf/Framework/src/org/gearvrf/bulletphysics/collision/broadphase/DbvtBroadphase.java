@@ -25,10 +25,9 @@
 
 package org.gearvrf.bulletphysics.collision.broadphase;
 
-import cz.advel.stack.Stack;
-
 import javax.vecmath.Vector3f;
 
+import org.gearvrf.bulletphysics.stack.Stack;
 import org.gearvrf.bulletphysics.util.ObjectArrayList;
 
 /**

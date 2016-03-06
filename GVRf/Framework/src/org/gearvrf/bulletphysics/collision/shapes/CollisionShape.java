@@ -23,13 +23,12 @@
 
 package org.gearvrf.bulletphysics.collision.shapes;
 
-import cz.advel.stack.Stack;
-
 import javax.vecmath.Vector3f;
 
 import org.gearvrf.bulletphysics.collision.broadphase.BroadphaseNativeType;
 import org.gearvrf.bulletphysics.collision.dispatch.CollisionObject;
 import org.gearvrf.bulletphysics.linearmath.Transform;
+import org.gearvrf.bulletphysics.stack.Stack;
 
 /**
  * CollisionShape class provides an interface for collision shapes that can be

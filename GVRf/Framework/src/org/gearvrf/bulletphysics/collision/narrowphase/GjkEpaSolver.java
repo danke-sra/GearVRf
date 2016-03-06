@@ -25,8 +25,6 @@ package org.gearvrf.bulletphysics.collision.narrowphase;
 
 import java.util.Arrays;
 
-import cz.advel.stack.Stack;
-
 import javax.vecmath.Matrix3f;
 import javax.vecmath.Quat4f;
 import javax.vecmath.Vector3f;
@@ -37,6 +35,7 @@ import org.gearvrf.bulletphysics.linearmath.MatrixUtil;
 import org.gearvrf.bulletphysics.linearmath.QuaternionUtil;
 import org.gearvrf.bulletphysics.linearmath.Transform;
 import org.gearvrf.bulletphysics.linearmath.VectorUtil;
+import org.gearvrf.bulletphysics.stack.Stack;
 import org.gearvrf.bulletphysics.util.ArrayPool;
 import org.gearvrf.bulletphysics.util.ObjectStackList;
 

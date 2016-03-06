@@ -23,8 +23,6 @@
 
 package org.gearvrf.bulletphysics.collision.dispatch;
 
-import cz.advel.stack.Stack;
-
 import javax.vecmath.Vector3f;
 
 import org.gearvrf.bulletphysics.collision.broadphase.CollisionAlgorithm;
@@ -34,6 +32,7 @@ import org.gearvrf.bulletphysics.collision.narrowphase.PersistentManifold;
 import org.gearvrf.bulletphysics.collision.shapes.ConvexShape;
 import org.gearvrf.bulletphysics.collision.shapes.StaticPlaneShape;
 import org.gearvrf.bulletphysics.linearmath.Transform;
+import org.gearvrf.bulletphysics.stack.Stack;
 import org.gearvrf.bulletphysics.util.ObjectArrayList;
 import org.gearvrf.bulletphysics.util.ObjectPool;
 

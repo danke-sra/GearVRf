@@ -25,8 +25,6 @@ package org.gearvrf.bulletphysics.dynamics;
 
 import java.util.Comparator;
 
-import cz.advel.stack.Stack;
-
 import javax.vecmath.Vector3f;
 
 import org.gearvrf.bulletphysics.BulletGlobals;
@@ -62,6 +60,7 @@ import org.gearvrf.bulletphysics.linearmath.MiscUtil;
 import org.gearvrf.bulletphysics.linearmath.ScalarUtil;
 import org.gearvrf.bulletphysics.linearmath.Transform;
 import org.gearvrf.bulletphysics.linearmath.TransformUtil;
+import org.gearvrf.bulletphysics.stack.Stack;
 import org.gearvrf.bulletphysics.util.ObjectArrayList;
 
 /**

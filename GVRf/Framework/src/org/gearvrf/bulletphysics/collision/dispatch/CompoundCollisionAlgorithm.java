@@ -30,10 +30,9 @@ import org.gearvrf.bulletphysics.collision.narrowphase.PersistentManifold;
 import org.gearvrf.bulletphysics.collision.shapes.CollisionShape;
 import org.gearvrf.bulletphysics.collision.shapes.CompoundShape;
 import org.gearvrf.bulletphysics.linearmath.Transform;
+import org.gearvrf.bulletphysics.stack.Stack;
 import org.gearvrf.bulletphysics.util.ObjectArrayList;
 import org.gearvrf.bulletphysics.util.ObjectPool;
-
-import cz.advel.stack.Stack;
 
 /**
  * CompoundCollisionAlgorithm supports collision between {@link CompoundShape}s and

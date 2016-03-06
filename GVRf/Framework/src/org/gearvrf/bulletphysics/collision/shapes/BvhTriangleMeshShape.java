@@ -23,13 +23,12 @@
 
 package org.gearvrf.bulletphysics.collision.shapes;
 
-import cz.advel.stack.Stack;
-
 import javax.vecmath.Vector3f;
 
 import org.gearvrf.bulletphysics.BulletGlobals;
 import org.gearvrf.bulletphysics.collision.broadphase.BroadphaseNativeType;
 import org.gearvrf.bulletphysics.linearmath.VectorUtil;
+import org.gearvrf.bulletphysics.stack.Stack;
 import org.gearvrf.bulletphysics.util.ObjectPool;
 
 /**

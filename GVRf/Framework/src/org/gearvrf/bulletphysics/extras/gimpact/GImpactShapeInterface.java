@@ -27,8 +27,6 @@
 
 package org.gearvrf.bulletphysics.extras.gimpact;
 
-import cz.advel.stack.Stack;
-
 import javax.vecmath.Vector3f;
 
 import org.gearvrf.bulletphysics.collision.broadphase.BroadphaseNativeType;
@@ -38,6 +36,7 @@ import org.gearvrf.bulletphysics.collision.shapes.ConcaveShape;
 import org.gearvrf.bulletphysics.collision.shapes.TriangleCallback;
 import org.gearvrf.bulletphysics.extras.gimpact.BoxCollision.AABB;
 import org.gearvrf.bulletphysics.linearmath.Transform;
+import org.gearvrf.bulletphysics.stack.Stack;
 
 /**
  * Base class for gimpact shapes.

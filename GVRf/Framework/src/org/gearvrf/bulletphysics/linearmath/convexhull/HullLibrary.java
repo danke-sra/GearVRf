@@ -25,14 +25,13 @@
 
 package org.gearvrf.bulletphysics.linearmath.convexhull;
 
-import cz.advel.stack.Stack;
-
 import javax.vecmath.Vector3f;
 
 import org.gearvrf.bulletphysics.BulletGlobals;
 import org.gearvrf.bulletphysics.collision.shapes.ShapeHull;
 import org.gearvrf.bulletphysics.linearmath.MiscUtil;
 import org.gearvrf.bulletphysics.linearmath.VectorUtil;
+import org.gearvrf.bulletphysics.stack.Stack;
 import org.gearvrf.bulletphysics.util.IntArrayList;
 import org.gearvrf.bulletphysics.util.ObjectArrayList;
 

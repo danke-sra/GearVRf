@@ -23,15 +23,14 @@
 
 package org.gearvrf.bulletphysics.linearmath;
 
-import cz.advel.stack.Stack;
-import cz.advel.stack.StaticAlloc;
-
 import javax.vecmath.Matrix3f;
 import javax.vecmath.Matrix4f;
 import javax.vecmath.Quat4f;
 import javax.vecmath.Vector3f;
 
 import org.gearvrf.bulletphysics.collision.shapes.UniformScalingShape;
+import org.gearvrf.bulletphysics.stack.Stack;
+import org.gearvrf.bulletphysics.stack.StaticAlloc;
 
 /**
  * Transform represents translation and rotation (rigid transform). Scaling and

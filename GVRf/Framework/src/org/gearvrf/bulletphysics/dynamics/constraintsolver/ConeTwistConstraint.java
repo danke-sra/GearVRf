@@ -25,8 +25,6 @@
 
 package org.gearvrf.bulletphysics.dynamics.constraintsolver;
 
-import cz.advel.stack.Stack;
-
 import javax.vecmath.Matrix3f;
 import javax.vecmath.Quat4f;
 import javax.vecmath.Vector3f;
@@ -37,6 +35,7 @@ import org.gearvrf.bulletphysics.linearmath.QuaternionUtil;
 import org.gearvrf.bulletphysics.linearmath.ScalarUtil;
 import org.gearvrf.bulletphysics.linearmath.Transform;
 import org.gearvrf.bulletphysics.linearmath.TransformUtil;
+import org.gearvrf.bulletphysics.stack.Stack;
 
 /**
  * ConeTwistConstraint can be used to simulate ragdoll joints (upper arm, leg etc).

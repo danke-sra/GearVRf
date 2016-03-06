@@ -23,8 +23,6 @@
 
 package org.gearvrf.bulletphysics.dynamics;
 
-import cz.advel.stack.Stack;
-
 import javax.vecmath.Vector3f;
 
 import org.gearvrf.bulletphysics.collision.broadphase.BroadphaseInterface;
@@ -37,6 +35,7 @@ import org.gearvrf.bulletphysics.collision.narrowphase.PersistentManifold;
 import org.gearvrf.bulletphysics.dynamics.constraintsolver.ConstraintSolver;
 import org.gearvrf.bulletphysics.dynamics.constraintsolver.ContactSolverInfo;
 import org.gearvrf.bulletphysics.linearmath.Transform;
+import org.gearvrf.bulletphysics.stack.Stack;
 import org.gearvrf.bulletphysics.util.ObjectArrayList;
 
 /**

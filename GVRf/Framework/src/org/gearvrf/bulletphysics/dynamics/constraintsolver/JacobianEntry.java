@@ -23,13 +23,12 @@
 
 package org.gearvrf.bulletphysics.dynamics.constraintsolver;
 
-import cz.advel.stack.Stack;
-
 import javax.vecmath.Matrix3f;
 import javax.vecmath.Vector3f;
 
 import org.gearvrf.bulletphysics.BulletGlobals;
 import org.gearvrf.bulletphysics.linearmath.VectorUtil;
+import org.gearvrf.bulletphysics.stack.Stack;
 
 //notes:
 // Another memory optimization would be to store m_1MinvJt in the remaining 3 w components

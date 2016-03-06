@@ -23,9 +23,6 @@
 
 package org.gearvrf.bulletphysics.collision.narrowphase;
 
-import cz.advel.stack.Stack;
-import cz.advel.stack.StaticAlloc;
-
 import javax.vecmath.Vector3f;
 
 import org.gearvrf.bulletphysics.BulletGlobals;
@@ -34,6 +31,8 @@ import org.gearvrf.bulletphysics.collision.shapes.ConvexShape;
 import org.gearvrf.bulletphysics.linearmath.IDebugDraw;
 import org.gearvrf.bulletphysics.linearmath.MatrixUtil;
 import org.gearvrf.bulletphysics.linearmath.Transform;
+import org.gearvrf.bulletphysics.stack.Stack;
+import org.gearvrf.bulletphysics.stack.StaticAlloc;
 
 /**
  * GjkPairDetector uses GJK to implement the {@link DiscreteCollisionDetectorInterface}.

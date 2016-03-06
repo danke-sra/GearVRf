@@ -23,8 +23,6 @@
 
 package org.gearvrf.bulletphysics.collision.narrowphase;
 
-import cz.advel.stack.Stack;
-
 import javax.vecmath.Vector3f;
 import javax.vecmath.Vector4f;
 
@@ -32,6 +30,7 @@ import org.gearvrf.bulletphysics.BulletGlobals;
 import org.gearvrf.bulletphysics.BulletStats;
 import org.gearvrf.bulletphysics.linearmath.Transform;
 import org.gearvrf.bulletphysics.linearmath.VectorUtil;
+import org.gearvrf.bulletphysics.stack.Stack;
 
 
 /**

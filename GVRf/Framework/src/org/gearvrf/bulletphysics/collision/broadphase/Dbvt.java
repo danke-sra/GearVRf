@@ -25,8 +25,6 @@
 
 package org.gearvrf.bulletphysics.collision.broadphase;
 
-import cz.advel.stack.Stack;
-
 import java.util.Collections;
 
 import javax.vecmath.Vector3f;
@@ -35,6 +33,7 @@ import org.gearvrf.bulletphysics.BulletGlobals;
 import org.gearvrf.bulletphysics.collision.broadphase.Dbvt.Node;
 import org.gearvrf.bulletphysics.linearmath.MiscUtil;
 import org.gearvrf.bulletphysics.linearmath.Transform;
+import org.gearvrf.bulletphysics.stack.Stack;
 import org.gearvrf.bulletphysics.util.IntArrayList;
 import org.gearvrf.bulletphysics.util.ObjectArrayList;
 

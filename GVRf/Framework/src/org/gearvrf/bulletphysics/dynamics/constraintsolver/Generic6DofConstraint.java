@@ -34,8 +34,6 @@ package org.gearvrf.bulletphysics.dynamics.constraintsolver;
 
 /// 
 
-import cz.advel.stack.Stack;
-
 import javax.vecmath.Matrix3f;
 import javax.vecmath.Vector3f;
 
@@ -44,6 +42,7 @@ import org.gearvrf.bulletphysics.dynamics.RigidBody;
 import org.gearvrf.bulletphysics.linearmath.MatrixUtil;
 import org.gearvrf.bulletphysics.linearmath.Transform;
 import org.gearvrf.bulletphysics.linearmath.VectorUtil;
+import org.gearvrf.bulletphysics.stack.Stack;
 /*!
 
 */

@@ -23,8 +23,6 @@
 
 package org.gearvrf.bulletphysics.collision.shapes;
 
-import cz.advel.stack.Stack;
-
 import javax.vecmath.Matrix3f;
 import javax.vecmath.Vector3f;
 
@@ -32,6 +30,7 @@ import org.gearvrf.bulletphysics.linearmath.AabbUtil2;
 import org.gearvrf.bulletphysics.linearmath.MatrixUtil;
 import org.gearvrf.bulletphysics.linearmath.Transform;
 import org.gearvrf.bulletphysics.linearmath.VectorUtil;
+import org.gearvrf.bulletphysics.stack.Stack;
 
 /**
  * Concave triangle mesh abstract class. Use {@link BvhTriangleMeshShape} as concrete

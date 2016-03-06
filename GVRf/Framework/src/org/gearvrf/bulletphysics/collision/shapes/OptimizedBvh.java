@@ -23,8 +23,6 @@
 
 package org.gearvrf.bulletphysics.collision.shapes;
 
-import cz.advel.stack.Stack;
-
 import java.io.Serializable;
 
 import javax.vecmath.Vector3f;
@@ -32,6 +30,7 @@ import javax.vecmath.Vector3f;
 import org.gearvrf.bulletphysics.linearmath.AabbUtil2;
 import org.gearvrf.bulletphysics.linearmath.MiscUtil;
 import org.gearvrf.bulletphysics.linearmath.VectorUtil;
+import org.gearvrf.bulletphysics.stack.Stack;
 import org.gearvrf.bulletphysics.util.ObjectArrayList;
 
 // JAVA NOTE: OptimizedBvh still from 2.66, update it for 2.70b1

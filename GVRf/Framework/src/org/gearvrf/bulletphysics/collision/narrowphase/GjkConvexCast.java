@@ -23,14 +23,13 @@
 
 package org.gearvrf.bulletphysics.collision.narrowphase;
 
-import cz.advel.stack.Stack;
-
 import javax.vecmath.Vector3f;
 
 import org.gearvrf.bulletphysics.collision.narrowphase.DiscreteCollisionDetectorInterface.ClosestPointInput;
 import org.gearvrf.bulletphysics.collision.shapes.ConvexShape;
 import org.gearvrf.bulletphysics.linearmath.Transform;
 import org.gearvrf.bulletphysics.linearmath.VectorUtil;
+import org.gearvrf.bulletphysics.stack.Stack;
 import org.gearvrf.bulletphysics.util.ObjectPool;
 
 /**

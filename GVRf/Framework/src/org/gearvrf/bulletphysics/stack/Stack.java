@@ -21,7 +21,7 @@
  * 3. This notice may not be removed or altered from any source distribution.
  */
 
-package cz.advel.stack;
+package org.gearvrf.bulletphysics.stack;
 
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Constructor;

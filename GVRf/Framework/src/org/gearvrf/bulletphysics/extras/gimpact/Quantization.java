@@ -27,11 +27,10 @@
 
 package org.gearvrf.bulletphysics.extras.gimpact;
 
-import cz.advel.stack.Stack;
-
 import javax.vecmath.Vector3f;
 
 import org.gearvrf.bulletphysics.linearmath.VectorUtil;
+import org.gearvrf.bulletphysics.stack.Stack;
 
 /**
  *

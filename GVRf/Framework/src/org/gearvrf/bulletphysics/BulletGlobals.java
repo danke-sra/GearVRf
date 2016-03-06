@@ -23,10 +23,9 @@
 
 package org.gearvrf.bulletphysics;
 
+import org.gearvrf.bulletphysics.stack.Stack;
 import org.gearvrf.bulletphysics.util.ArrayPool;
 import org.gearvrf.bulletphysics.util.ObjectPool;
-
-import cz.advel.stack.Stack;
 
 /**
  * Bullet global settings and constants.

@@ -27,13 +27,12 @@
 
 package org.gearvrf.bulletphysics.extras.gimpact;
 
-import cz.advel.stack.Stack;
-
 import javax.vecmath.Vector3f;
 
 import org.gearvrf.bulletphysics.extras.gimpact.BoxCollision.AABB;
 import org.gearvrf.bulletphysics.extras.gimpact.BoxCollision.BoxBoxTransformCache;
 import org.gearvrf.bulletphysics.linearmath.Transform;
+import org.gearvrf.bulletphysics.stack.Stack;
 import org.gearvrf.bulletphysics.util.IntArrayList;
 
 /**

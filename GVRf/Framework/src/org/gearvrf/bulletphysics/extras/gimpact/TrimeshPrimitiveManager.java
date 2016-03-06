@@ -27,14 +27,13 @@
 
 package org.gearvrf.bulletphysics.extras.gimpact;
 
-import cz.advel.stack.Stack;
-
 import javax.vecmath.Vector3f;
 
 import org.gearvrf.bulletphysics.collision.shapes.StridingMeshInterface;
 import org.gearvrf.bulletphysics.collision.shapes.VertexData;
 import org.gearvrf.bulletphysics.extras.gimpact.BoxCollision.AABB;
 import org.gearvrf.bulletphysics.linearmath.VectorUtil;
+import org.gearvrf.bulletphysics.stack.Stack;
 
 /**
  *

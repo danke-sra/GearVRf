@@ -30,13 +30,12 @@ http://gimpact.sf.net
 
 package org.gearvrf.bulletphysics.dynamics.constraintsolver;
 
-import cz.advel.stack.Stack;
-import cz.advel.stack.StaticAlloc;
-
 import javax.vecmath.Vector3f;
 
 import org.gearvrf.bulletphysics.dynamics.RigidBody;
 import org.gearvrf.bulletphysics.linearmath.VectorUtil;
+import org.gearvrf.bulletphysics.stack.Stack;
+import org.gearvrf.bulletphysics.stack.StaticAlloc;
 
 /**
  *

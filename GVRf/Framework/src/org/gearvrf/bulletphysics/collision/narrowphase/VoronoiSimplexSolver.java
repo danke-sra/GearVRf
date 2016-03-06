@@ -23,12 +23,11 @@
 
 package org.gearvrf.bulletphysics.collision.narrowphase;
 
-import cz.advel.stack.Stack;
-import cz.advel.stack.StaticAlloc;
-
 import javax.vecmath.Vector3f;
 
 import org.gearvrf.bulletphysics.linearmath.VectorUtil;
+import org.gearvrf.bulletphysics.stack.Stack;
+import org.gearvrf.bulletphysics.stack.StaticAlloc;
 import org.gearvrf.bulletphysics.util.ObjectPool;
 
 /**

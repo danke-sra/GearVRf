@@ -23,8 +23,6 @@
 
 package org.gearvrf.bulletphysics.dynamics.character;
 
-import cz.advel.stack.Stack;
-
 import javax.vecmath.Vector3f;
 
 import org.gearvrf.bulletphysics.BulletGlobals;
@@ -39,6 +37,7 @@ import org.gearvrf.bulletphysics.collision.shapes.ConvexShape;
 import org.gearvrf.bulletphysics.dynamics.ActionInterface;
 import org.gearvrf.bulletphysics.linearmath.IDebugDraw;
 import org.gearvrf.bulletphysics.linearmath.Transform;
+import org.gearvrf.bulletphysics.stack.Stack;
 import org.gearvrf.bulletphysics.util.ObjectArrayList;
 
 /**

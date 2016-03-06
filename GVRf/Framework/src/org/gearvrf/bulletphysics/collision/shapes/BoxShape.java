@@ -23,8 +23,6 @@
 
 package org.gearvrf.bulletphysics.collision.shapes;
 
-import cz.advel.stack.Stack;
-
 import javax.vecmath.Vector3f;
 import javax.vecmath.Vector4f;
 
@@ -35,6 +33,7 @@ import org.gearvrf.bulletphysics.linearmath.AabbUtil2;
 import org.gearvrf.bulletphysics.linearmath.ScalarUtil;
 import org.gearvrf.bulletphysics.linearmath.Transform;
 import org.gearvrf.bulletphysics.linearmath.VectorUtil;
+import org.gearvrf.bulletphysics.stack.Stack;
 
 /**
  * BoxShape is a box primitive around the origin, its sides axis aligned with length

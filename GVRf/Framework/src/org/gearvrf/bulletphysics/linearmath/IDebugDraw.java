@@ -23,12 +23,11 @@
 
 package org.gearvrf.bulletphysics.linearmath;
 
-import cz.advel.stack.Stack;
-
 import javax.vecmath.Vector3f;
 
 import org.gearvrf.bulletphysics.collision.dispatch.CollisionWorld;
 import org.gearvrf.bulletphysics.dynamics.DynamicsWorld;
+import org.gearvrf.bulletphysics.stack.Stack;
 
 /**
  * IDebugDraw interface class allows hooking up a debug renderer to visually debug
