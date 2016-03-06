@@ -45,7 +45,7 @@ public class JassimpModelLoaderViewManager extends GVRScript {
 
     @Override
     public void onInit(GVRContext gvrContext) {
-
+        gvrContext.startDebugServer();
         mAnimationEngine = gvrContext.getAnimationEngine();
 
         mMainScene = gvrContext.getNextMainScene(new Runnable() {
