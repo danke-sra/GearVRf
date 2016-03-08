@@ -17,8 +17,10 @@ package org.gearvrf;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLEncoder;
 
 import android.os.Environment;
 
@@ -138,6 +140,19 @@ public class GVRResourceVolume {
     protected String adaptFilePath(String filePath) {
         // Convert windows file path to target FS
         String targetPath = filePath.replaceAll("\\\\", volumeType.getSeparator());
+
+        // FS-specific
+        switch (volumeType) {
+        case NETWORK:
+            try {
+                targetPath = URLEncoder.encode(targetPath, "UTF-8");
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+            break;
+        default:
+            break;
+        }
 
         return targetPath;
     }
