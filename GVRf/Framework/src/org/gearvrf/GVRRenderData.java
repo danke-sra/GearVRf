@@ -43,6 +43,7 @@ public class GVRRenderData extends GVRComponent implements PrettyPrint {
     private ArrayList<GVRRenderPass> mRenderPassList;
     private static final String TAG = "GearVRf";
     private GVRLight mLight;
+    private boolean mLightMapEnabled;
 
     /** Just for {@link #getMeshEyePointee()} */
     private Future<GVRMesh> mFutureMesh;
@@ -106,6 +107,7 @@ public class GVRRenderData extends GVRComponent implements PrettyPrint {
         mRenderPassList = new ArrayList<GVRRenderPass>();
         addPass(basePass);
         isLightEnabled = false;
+        mLightMapEnabled = false;
     }
 
     private GVRRenderData(GVRContext gvrContext, long ptr) {
@@ -169,17 +171,26 @@ public class GVRRenderData extends GVRComponent implements PrettyPrint {
         synchronized (this) {
             mFutureMesh = mesh;
         }
-        Threads.spawn(new Runnable() {
 
-            @Override
-            public void run() {
-                try {
-                    setMesh(mesh.get());
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+        if (mesh.isDone()) {
+            try {
+                setMesh(mesh.get());
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-        });
+        } else {
+            Threads.spawn(new Runnable() {
+
+                @Override
+                public void run() {
+                    try {
+                        setMesh(mesh.get());
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+        }
     }
 
     /**
@@ -432,6 +443,24 @@ public class GVRRenderData extends GVRComponent implements PrettyPrint {
     }
 
     /**
+     * Enable lighting map effect for the render_data.
+     */
+    public void enableLightMap() {
+
+        NativeRenderData.enableLightMap(getNative());
+        mLightMapEnabled = true;
+    }
+
+    /**
+     * Disable lighting map effect for the render_data.
+     */
+    public void disableLightMap() {
+
+        NativeRenderData.disableLightMap(getNative());
+        mLightMapEnabled = false;
+    }
+
+    /**
      * Get the enable/disable status for the lighting effect. Note that it is
      * different to enable/disable status of the light. The lighting effect is
      * applied if and only if {@code mLight} is enabled (i.e. on) AND the
@@ -442,6 +471,15 @@ public class GVRRenderData extends GVRComponent implements PrettyPrint {
      */
     public boolean isLightEnabled() {
         return isLightEnabled;
+    }
+
+    /**
+     * Get the enable/disable status for the lighting map effect.
+     * 
+     * @return true if lighting map effect is enabled, otherwise returns false.
+     */
+    public boolean isLightMapEnabled() {
+        return mLightMapEnabled;
     }
 
     /**
@@ -667,6 +705,50 @@ public class GVRRenderData extends GVRComponent implements PrettyPrint {
     public void setAlphaBlend(boolean alphaBlend) {
         NativeRenderData.setAlphaBlend(getNative(), alphaBlend);
     }
+    /**
+     * @return {@code true} if {@code GL_ALPHA_TO_COVERAGE} is enabled, {@code false} if not
+     */
+    public boolean getAlphaToCoverage() {
+        return NativeRenderData.getAlphaToCoverage(getNative());
+    }
+    
+    /**
+     * @param alphaToCoverage
+     *            {@code true} if {@code GL_ALPHA_TO_COVERAGE} should be enabled,
+     *            {@code false} if not.
+     */
+    public void setAlphaToCoverage(boolean alphaToCoverage) {
+        NativeRenderData.setAlphaToCoverage(getNative(), alphaToCoverage);
+    }
+
+    /**
+     * @return value of sample coverage
+     */
+    public float getSampleCoverage(){
+        return NativeRenderData.getSampleCoverage(getNative());
+    }
+    /**
+     * @param sampleCoverage
+     *                 Specifies the coverage of the modification mask.
+     */
+    public void setSampleCoverage(float sampleCoverage) {
+        NativeRenderData.setSampleCoverage(getNative(),sampleCoverage);
+    }
+    
+    /**
+     * @return whether the modification mask implied by value is inverted or not
+     */
+    public boolean getInvertCoverageMask(){
+        return NativeRenderData.getInvertCoverageMask(getNative());
+    }
+    
+    /**
+     * @param invertCoverageMask
+     *          Specifies whether the modification mask implied by value is inverted or not.
+     */
+    public void setInvertCoverageMask(boolean invertCoverageMask){
+        NativeRenderData.setInvertCoverageMask(getNative(),invertCoverageMask);
+    }
 
     /**
      * @return The OpenGL draw mode (e.g. GL_TRIANGLES).
@@ -757,6 +839,10 @@ class NativeRenderData {
 
     static native void disableLight(long renderData);
 
+    static native void enableLightMap(long renderData);
+
+    static native void disableLightMap(long renderData);
+
     static native int getRenderMask(long renderData);
 
     static native void setRenderMask(long renderData, int renderMask);
@@ -784,6 +870,18 @@ class NativeRenderData {
     static native boolean getAlphaBlend(long renderData);
 
     public static native void setAlphaBlend(long renderData, boolean alphaBlend);
+
+    static native boolean getAlphaToCoverage(long renderData);
+
+    public static native void setAlphaToCoverage(long renderData, boolean alphaToCoverage);    
+
+    static native float getSampleCoverage(long renderData);
+
+    public static native void setSampleCoverage(long renderData,float sampleCoverage);
+    
+    static native boolean getInvertCoverageMask(long renderData);
+
+    public static native void setInvertCoverageMask(long renderData,boolean invertCoverageMask);
 
     public static native int getDrawMode(long renderData);
 

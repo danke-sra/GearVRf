@@ -151,7 +151,8 @@ public class VrAppSettings {
             COLOR_8888(3), // 8-bit red, 8-bit green, 8-bit blue, 8-bit alpha
                            // channel.
 
-            COLOR_8888_sRGB(4);// SRGB color format
+            COLOR_8888_sRGB(4), // SRGB color format
+            COLOR_RGBA16F(5);   // GL_RGBA16F
 
             private final int value;
 
@@ -578,6 +579,10 @@ public class VrAppSettings {
     // Not going to become part of xml content.
     public static boolean isShowDebugLog = false;
 
+    // Use this flag to enable the gaze cursor controller whenever
+    // the phone is docked.
+    boolean useGazeCursorController;
+
     public ModeParms modeParms;
     public EyeBufferParms eyeBufferParms;
     public HeadModelParms headModelParms;
@@ -639,6 +644,25 @@ public class VrAppSettings {
      */
     public void setUseSrgbFramebuffer(boolean useSrgbFramebuffer) {
         this.useSrgbFramebuffer = useSrgbFramebuffer;
+    }
+    
+    /**
+     * Check if current app is using the gaze cursor controller
+     * 
+     * @return if current app is using the gaze cursor controller
+     */
+    public boolean useGazeCursorController() {
+        return useGazeCursorController;
+    }
+
+    /**
+     * Set if current app is using the gaze cursor controller
+     * 
+     * @param useGazeCursorController
+     *            if current app is using the gaze cursor controller
+     */
+    public void setUseGazeCursorController(boolean useGazeCursorController) {
+        this.useGazeCursorController = useGazeCursorController;
     }
 
     /**

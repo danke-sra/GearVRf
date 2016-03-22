@@ -8,12 +8,18 @@ import org.joml.Matrix4f;
 
 /**
  * Controls node animation.
+ *
+ * A node animation continuously changes the Transform of a target {@link GVRSceneObject}.
+ * The {@link GVRKeyFrameAnimation} can be obtained from {@linkplain org.gearvrf.scene_objects.GVRModelSceneObject
+ * GVRModelSceneObject} using API as {@linkplain org.gearvrf.GVRContext#loadModel(String) GVRContext.loadModel}. <p>
+ *
+ * In order to import FBX animation correctly, it is required that key frames only use Euler angles within the
+ * range [0, 360) degrees. To avoid ambiguity, the angle difference between two adjacent key frames should be less
+ * than 180 degrees per component.
  */
-public class GVRNodeAnimationController {
+public class GVRNodeAnimationController extends GVRAnimationController {
     private static final String TAG = GVRNodeAnimationController.class.getSimpleName();
-
     protected GVRSceneObject sceneRoot;
-    protected GVRKeyFrameAnimation animation;
 
     protected class AnimationItem {
         GVRSceneObject target;
@@ -35,8 +41,8 @@ public class GVRNodeAnimationController {
      * @param animation The animation object.
      */
     public GVRNodeAnimationController(GVRSceneObject sceneRoot, GVRKeyFrameAnimation animation) {
+        super(animation);
         this.sceneRoot = sceneRoot;
-        this.animation = animation;
 
         animatedNodes = new ArrayList<AnimationItem>();
         if (animation != null) {
@@ -62,22 +68,13 @@ public class GVRNodeAnimationController {
     }
 
     /**
-     * Update node transforms at each animation step.
+     * Update node transforms to a tick.
+     * @param animationTick
+     *         The tick to animate to.
      */
-    public void animate(float timeInSeconds) {
-        float ticksPerSecond;
-        float timeInTicks;
-        Matrix4f[] animationTransform = null;
-
-        if (animation.mTicksPerSecond != 0) {
-            ticksPerSecond = (float) animation.mTicksPerSecond;
-        } else {
-            ticksPerSecond = 25.0f;
-        }
-        timeInTicks = timeInSeconds * ticksPerSecond;
-
-        float animationTime = timeInTicks % animation.mDurationTicks; // auto-repeat
-        animationTransform = animation.getTransforms(animationTime);
+    @Override
+    protected void animateImpl(float animationTick) {
+        Matrix4f[] animationTransform = animation.getTransforms(animationTick);
 
         for (AnimationItem item : animatedNodes) {
             item.target.getTransform().setModelMatrix(animationTransform[item.channelId]);

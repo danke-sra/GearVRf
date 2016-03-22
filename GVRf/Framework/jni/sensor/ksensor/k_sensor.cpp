@@ -37,7 +37,7 @@ namespace gvr {
 //#define LOG_SUMMARY
 //#define LOG_GYRO_FILTER
 //#define LOG_MAGNETOMETER_CORRECTION
-//#define LOG_TILE_CORRECTION
+//#define LOG_TILT_CORRECTION
 
 float acosx(const float angle);
 
@@ -47,14 +47,10 @@ void KSensor::readerThreadFunc() {
     pid_t tid = gettid();
     LOGV("k_sensor: reader starting up; tid: %d", tid);
 
-    readFactoryCalibration();
+    pthread_setname_np(pthread_self(), "ksensor");
 
-    while (0 > (fd_ = open("/dev/ovr0", O_RDONLY))) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(50));
-        if (!processing_flag_) {
-            return;
-        }
-    }
+    readFactoryCalibration();
+    openOvrDevice();
 
     glm::quat q;
     glm::vec3 corrected_gyro;
@@ -115,7 +111,7 @@ void KSensor::stop() {
 bool KSensor::pollSensor(KTrackerSensorZip* data) {
     struct pollfd pfds;
     pfds.fd = fd_;
-    pfds.events = POLLIN;
+    pfds.events = POLLIN | POLLHUP | POLLERR;
 
     uint8_t buffer[100];
     int n = poll(&pfds, 1, 100);
@@ -152,6 +148,10 @@ bool KSensor::pollSensor(KTrackerSensorZip* data) {
         }
 
         return true;
+    } else if (0 < n && (pfds.revents & POLLHUP)) {
+        LOGI("k_sensor: received POLLHUP, will try to reopen device until interrupted");
+        last_rotation_rate_ = last_acceleration_ = last_corrected_gyro_ = glm::vec3(0, 0, 0);
+        openOvrDevice();
     }
     return false;
 }
@@ -266,6 +266,8 @@ void KSensor::updateQ(KTrackerMessage *msg, glm::vec3& corrected_gyro, glm::quat
 #ifdef FEATURE_MAGNETOMETER_YAW_CORRECTION
     q = applyMagnetometerCorrection(q, msg->Acceleration, filteredGyro, deltaT);
 #endif
+
+    corrected_gyro = filteredGyro;
 
     step_++;
     // Normalize error

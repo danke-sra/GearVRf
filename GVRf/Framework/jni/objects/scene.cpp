@@ -19,12 +19,13 @@
 
 #include "scene.h"
 
+#include "engine/exporter/exporter.h"
 #include "objects/scene_object.h"
 
 namespace gvr {
 Scene::Scene() :
         HybridObject(), scene_objects_(), main_camera_rig_(), frustum_flag_(
-                false), dirtyFlag_(0), occlusion_flag_(false) {
+                false), dirtyFlag_(0), occlusion_flag_(false), directional_light_() {
 }
 
 Scene::~Scene() {
@@ -40,11 +41,15 @@ void Scene::removeSceneObject(SceneObject* scene_object) {
                     scene_object), scene_objects_.end());
 }
 
+void Scene::removeAllSceneObjects() {
+    scene_objects_.clear();
+}
+
 std::vector<SceneObject*> Scene::getWholeSceneObjects() {
     std::vector<SceneObject*> scene_objects(scene_objects_);
     for (int i = 0; i < scene_objects.size(); ++i) {
-        std::vector<SceneObject*> children(scene_objects[i]->children());
-        for (auto it = children.begin(); it != children.end(); ++it) {
+        std::vector<SceneObject*> childrenCopy = scene_objects[i]->children();
+        for (auto it = childrenCopy.begin(); it != childrenCopy.end(); ++it) {
             scene_objects.push_back(*it);
         }
     }
@@ -52,4 +57,7 @@ std::vector<SceneObject*> Scene::getWholeSceneObjects() {
     return scene_objects;
 }
 
+void Scene::exportToFile(std::string filepath) {
+    Exporter::writeToFile(this, filepath);
+}
 }

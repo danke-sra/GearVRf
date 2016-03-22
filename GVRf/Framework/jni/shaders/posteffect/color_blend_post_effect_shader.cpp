@@ -24,7 +24,6 @@
 #include "objects/post_effect_data.h"
 #include "objects/textures/render_texture.h"
 #include "util/gvr_gl.h"
-#include "engine/memory/gl_delete.h"
 
 namespace gvr {
 static const char VERTEX_SHADER[] = "attribute vec4 a_position;\n"
@@ -50,6 +49,8 @@ static const char FRAGMENT_SHADER[] = "precision highp float;\n"
 ColorBlendPostEffectShader::ColorBlendPostEffectShader() :
         program_(0), a_position_(0), a_tex_coord_(0), u_texture_(0), u_color_(
                 0), u_factor_(0) {
+    deleter_ = getDeleterForThisThread();
+
     program_ = new GLProgram(VERTEX_SHADER, FRAGMENT_SHADER);
     a_position_ = glGetAttribLocation(program_->id(), "a_position");
     a_tex_coord_ = glGetAttribLocation(program_->id(), "a_tex_coord");
@@ -62,7 +63,7 @@ ColorBlendPostEffectShader::ColorBlendPostEffectShader() :
 ColorBlendPostEffectShader::~ColorBlendPostEffectShader() {
     delete program_;
     if (vaoID_ != 0) {
-        gl_delete.queueVertexArray(vaoID_);
+        deleter_->queueVertexArray(vaoID_);
     }
 }
 
@@ -78,7 +79,6 @@ void ColorBlendPostEffectShader::render(
 
     glUseProgram(program_->id());
 
-#if _GVRF_USE_GLES3_
     GLuint tmpID;
 
     if(vaoID_ == 0)
@@ -119,26 +119,6 @@ void ColorBlendPostEffectShader::render(
     glBindVertexArray(vaoID_);
     glDrawElements(GL_TRIANGLES, triangles.size(), GL_UNSIGNED_SHORT, 0);
     glBindVertexArray(0);
-
-#else
-    glVertexAttribPointer(a_position_, 3, GL_FLOAT, GL_FALSE, 0,
-            vertices.data());
-    glEnableVertexAttribArray(a_position_);
-
-    glVertexAttribPointer(a_tex_coord_, 2, GL_FLOAT, GL_FALSE, 0,
-            tex_coords.data());
-    glEnableVertexAttribArray(a_tex_coord_);
-
-    glActiveTexture (GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, render_texture->getId());
-    glUniform1i(u_texture_, 0);
-
-    glUniform3f(u_color_, r, g, b);
-    glUniform1f(u_factor_, factor);
-
-    glDrawElements(GL_TRIANGLES, triangles.size(), GL_UNSIGNED_SHORT,
-            triangles.data());
-#endif
 
     checkGlError("ColorBlendPostEffectShader::render");
 }

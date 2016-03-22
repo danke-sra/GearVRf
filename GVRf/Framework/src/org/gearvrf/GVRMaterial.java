@@ -21,8 +21,8 @@ import java.util.concurrent.Future;
 
 import org.gearvrf.utility.Colors;
 import org.gearvrf.utility.Threads;
-import static org.gearvrf.utility.Assert.*;
 
+import static org.gearvrf.utility.Assert.*;
 import android.graphics.Color;
 
 /**
@@ -154,9 +154,16 @@ public class GVRMaterial extends GVRHybridObject implements
             }
         }
 
+
         public abstract static class UnlitFBO {
             public static final GVRMaterialShaderId ID = new GVRStockMaterialShaderId(
                     20);
+					}
+
+        public abstract static class LightMap {
+            public static final GVRMaterialShaderId ID = new GVRStockMaterialShaderId(
+                    11);
+
         }
     };
 
@@ -223,6 +230,110 @@ public class GVRMaterial extends GVRHybridObject implements
 
     public void setMainTexture(Future<GVRTexture> texture) {
         setTexture(MAIN_TEXTURE, texture);
+    }
+
+    /**
+     * Set the baked light map texture
+     *
+     * @param texture
+     *            Texture with baked light map
+     */
+    public void setLightMapTexture(GVRTexture texture) {
+        setTexture("lightmap_texture", texture);
+    }
+
+    /**
+     * Set the baked light map texture
+     *
+     * @param texture
+     *            Texture with baked light map
+     */
+    public void setLightMapTexture(Future<GVRTexture> texture) {
+        setTexture("lightmap_texture", texture);
+    }
+
+    /**
+     * Set the light map information(offset and scale) at UV space to
+     * map the light map texture to the mesh.
+     *
+     * @param lightMapInformation
+     *            Atlas information object with the offset and scale
+     * at UV space necessary to map the light map texture to the mesh.
+     */
+    public void setLightMapInfo(GVRAtlasInformation lightMapInformation) {
+        setTextureAtlasInfo("lightmap", lightMapInformation);
+    }
+
+    /**
+     * Set the light map information(offset and scale) at UV space to
+     * map the light map texture to the mesh.
+     *
+     * @param key
+     *            Prefix name of the uniform at light map shader:
+     *            ([key]_texture, [key]_offset and [key]_scale.
+     * @param lightMapInformation
+     *            Atlas information object with the offset and scale
+     * at UV space necessary to map the light map texture to the mesh.
+     */
+    public void setTextureAtlasInfo(String key, GVRAtlasInformation atlasInformation) {
+        setTextureAtlasInfo(key, atlasInformation.getOffset(), atlasInformation.getScale());
+    }
+
+    /**
+     * Set the light map information(offset and scale) at UV space to
+     * map the light map texture to the mesh.
+     *
+     * @param key
+     *            Prefix name of the uniform at light map shader:
+     *            ([key]_texture, [key]_offset and [key]_scale.
+     * @param offset
+     *            Array with x and y offset values at UV space
+     *            to map the 2D texture to the mesh.
+     * @param scale
+     *            Array with x and y scale values at UV space
+     *            to map the 2D texture to the mesh.
+     */
+    public void setTextureAtlasInfo(String key, float[] offset, float[] scale) {
+        setTextureOffset(key, offset);
+        setTextureScale(key, scale);
+    }
+
+    /**
+     * Returns the placement offset of texture {@code key}}
+     * @param key Texture name. A common name is "main",
+     *            "lightmap", etc.
+     * @return    The vector of x and y at uv space.
+     */
+    public float[] getTextureOffset(String key) {
+        return getVec2(key + "_offset");
+    }
+
+    /**
+     * Set the placement offset of texture {@code key}}
+     * @param key Texture name. A common name is "main",
+     *            "lightmap", etc.
+     */
+    public void setTextureOffset(String key, float[] offset) {
+        setVec2(key + "_offset", offset[0], offset[1]);
+    }
+
+    /**
+     * Returns the placement scale of texture {@code key}}
+     * @param key Texture name. A common name is "main",
+     *            "lightmap", etc.
+     * @return    The vector of x and y at uv space.
+     */
+    public float[] getTextureScale(String key) {
+        return getVec2(key + "_scale");
+    }
+
+    /**
+     * Set the placement scale of texture {@code key}}
+     * @param key Texture name. A common name is "main",
+     *            "lightmap", etc.
+     */
+    public void setTextureScale(String key, float[] scale) {
+        setVec2(key + "_scale", scale[0], scale[1]);
     }
 
     /**
@@ -483,17 +594,25 @@ public class GVRMaterial extends GVRHybridObject implements
     }
 
     public void setTexture(final String key, final Future<GVRTexture> texture) {
-        Threads.spawn(new Runnable() {
-
-            @Override
-            public void run() {
-                try {
-                    setTexture(key, texture.get());
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+        if (texture.isDone()) {
+            try {
+                setTexture(key, texture.get());
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-        });
+        } else {
+            Threads.spawn(new Runnable() {
+
+                @Override
+                public void run() {
+                    try {
+                        setTexture(key, texture.get());
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+        }
     }
 
     public float getFloat(String key) {

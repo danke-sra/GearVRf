@@ -77,7 +77,7 @@ void UnlitFboShader::render(const glm::mat4& mvp_matrix,
         throw error;
     }
 
-#if _GVRF_USE_GLES3_
+#if 1
     mesh->generateVAO();
 
     glUseProgram(program_->id());

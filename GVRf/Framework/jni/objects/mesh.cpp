@@ -28,9 +28,10 @@
 #include "util/gvr_log.h"
 #include "util/gvr_gl.h"
 #include "glm/gtc/matrix_inverse.hpp"
+#include "../gl/gl_program.h"
 
 namespace gvr {
-Mesh* Mesh::getBoundingBox() {
+Mesh* Mesh::createBoundingBox() {
 
     Mesh* mesh = new Mesh();
 
@@ -178,15 +179,12 @@ void Mesh::getTransformedBoundingBoxInfo(glm::mat4 *Mat,
 
 // generate vertex array object
 void Mesh::generateVAO() {
-#if _GVRF_USE_GLES3_
-
-
     GLuint tmpID;
 
     if (!vao_dirty_) {
          return;
     }
-
+    obtainDeleter();
     deleteVaos();
 
     if (vertices_.size() == 0 && normals_.size() == 0
@@ -286,7 +284,6 @@ void Mesh::generateVAO() {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
     vao_dirty_ = false;
-#endif
 }
 
 void Mesh::generateBoneArrayBuffers() {
@@ -296,7 +293,7 @@ void Mesh::generateBoneArrayBuffers() {
 
     // delete
     if (boneVboID_ != GVR_INVALID) {
-        gl_delete.queueBuffer(boneVboID_);
+        deleter_->queueBuffer(boneVboID_);
         boneVboID_ = GVR_INVALID;
     }
 

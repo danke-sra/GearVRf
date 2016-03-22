@@ -18,7 +18,11 @@ package org.gearvrf;
 import javax.microedition.khronos.egl.EGLContext;
 
 import org.gearvrf.animation.GVRAnimation;
+
 import org.gearvrf.plugins.GVRPlugin;
+
+import org.gearvrf.script.IScriptable;
+
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -32,7 +36,7 @@ import android.graphics.BitmapFactory;
  * processes running at any time, and all {@linkplain Thread#NORM_PRIORITY
  * default priority} threads compete with each other.
  */
-public abstract class GVRScript {
+public abstract class GVRScript implements IScriptEvents, IScriptable, IEventReceiver {
 
     // private static final String TAG = Log.tag(GVRScript.class);
 
@@ -50,6 +54,8 @@ public abstract class GVRScript {
 
     /** Splash screen, distance from the camera. */
     private static final float DEFAULT_SPLASH_Z = -1.25f;
+
+    private final GVREventReceiver mEventReceiver = new GVREventReceiver(this);
 
     /*
      * Core methods, that you must override.
@@ -79,7 +85,20 @@ public abstract class GVRScript {
      *             but it is just fine for handling development-time issues like
      *             typing {@code "mesh.obi"} instead of {@code "mesh.obj"}.
      */
+    @Override
     public abstract void onInit(GVRContext gvrContext) throws Throwable;
+
+    /**
+     * Called after {@code onInit()} has finished.
+     *
+     * This is where you do some post-processing of the initial scene graph
+     * created in the method {@link #onInit(GVRContext)}, a listener added to
+     * {@link GVREventReceiver} or a {@link GVRScriptFile} attached to this {@link
+     * GVRScript} using {@link GVRScriptManager#attachScript}.
+     */
+    @Override
+    public void onAfterInit() {
+    }
 
     /**
      * Called every frame.
@@ -101,7 +120,13 @@ public abstract class GVRScript {
      * After these steps, {@link GVRViewManager} does stereo rendering and
      * applies the lens distortion.
      */
+    @Override
     public abstract void onStep();
+
+    @Override
+    public GVREventReceiver getEventReceiver() {
+        return mEventReceiver;
+    }
 
     /*
      * Splash screen support: methods to call or overload to change the default

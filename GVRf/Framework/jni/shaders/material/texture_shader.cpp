@@ -197,18 +197,16 @@ void TextureShader::render(const glm::mat4& mv_matrix,
         }
     }
 
-#if _GVRF_USE_GLES3_
-
     mesh->generateVAO();
 
     if (use_light) {
-        glUseProgram(program_light_->id());
+        GL(glUseProgram(program_light_->id()));
     } else {
-        glUseProgram(program_no_light_->id());
+        GL(glUseProgram(program_no_light_->id()));
     }
 
-    glActiveTexture (GL_TEXTURE0);
-    glBindTexture(texture->getTarget(), texture->getId());
+    GL(glActiveTexture (GL_TEXTURE0));
+    GL(glBindTexture(texture->getTarget(), texture->getId()));
 
     if (use_light) {
         glm::vec3 light_position = light->getVec3("position");
@@ -259,32 +257,9 @@ void TextureShader::render(const glm::mat4& mv_matrix,
         glBindVertexArray(mesh->getVAOId(Material::TEXTURE_SHADER_NOLIGHT));
     }
 
-    glDrawElements(render_data->draw_mode(), mesh->indices().size(), GL_UNSIGNED_SHORT,
-            0);
-    glBindVertexArray(0);
-
-#else
-    glUseProgram(program_->id());
-
-    glVertexAttribPointer(a_position_, 3, GL_FLOAT, GL_FALSE, 0,
-            mesh->vertices().data());
-    glEnableVertexAttribArray(a_position_);
-
-    glUniformMatrix4fv(u_mv_, 1, GL_FALSE, glm::value_ptr(mv_matrix));
-    glUniformMatrix4fv(u_mv_it_, 1, GL_FALSE, glm::value_ptr(mv_it_matrix));
-    glUniformMatrix4fv(u_mvp_, 1, GL_FALSE, glm::value_ptr(mvp_matrix));
-
-    glActiveTexture (GL_TEXTURE0);
-    glBindTexture(texture->getTarget(), texture->getId());
-    glUniform1i(u_texture_, 0);
-
-    glUniform3f(u_color_, color.r, color.g, color.b);
-
-    glUniform1f(u_opacity_, opacity);
-
-    glDrawElements(render_data->draw_mode(), mesh->indices().size(), GL_UNSIGNED_SHORT,
-            mesh->indices().data());
-#endif
+    GL(glDrawElements(render_data->draw_mode(), mesh->indices().size(), GL_UNSIGNED_SHORT,
+            0));
+    GL(glBindVertexArray(0));
 
     checkGlError("TextureShader::render");
 }

@@ -52,6 +52,14 @@ JNIEXPORT void JNICALL
 Java_org_gearvrf_NativeRenderData_disableLight(JNIEnv * env,
         jobject obj, jlong jrender_data);
 
+JNIEXPORT void JNICALL
+Java_org_gearvrf_NativeRenderData_enableLightMap(JNIEnv * env,
+        jobject obj, jlong jrender_data);
+
+JNIEXPORT void JNICALL
+Java_org_gearvrf_NativeRenderData_disableLightMap(JNIEnv * env,
+        jobject obj, jlong jrender_data);
+
 JNIEXPORT jint JNICALL
 Java_org_gearvrf_NativeRenderData_getRenderMask(JNIEnv * env,
         jobject obj, jlong jrender_data);
@@ -102,6 +110,30 @@ Java_org_gearvrf_NativeRenderData_getAlphaBlend(JNIEnv * env,
 JNIEXPORT void JNICALL
 Java_org_gearvrf_NativeRenderData_setAlphaBlend(JNIEnv * env,
         jobject obj, jlong jrender_data, jboolean alpha_blend);
+
+JNIEXPORT jboolean JNICALL
+Java_org_gearvrf_NativeRenderData_getAlphaToCoverage(JNIEnv * env,
+        jobject obj, jlong jrender_data);
+
+JNIEXPORT void JNICALL
+Java_org_gearvrf_NativeRenderData_setAlphaToCoverage(JNIEnv * env,
+        jobject obj, jlong jrender_data, jboolean alphaToCoverage);
+
+JNIEXPORT void JNICALL
+Java_org_gearvrf_NativeRenderData_setSampleCoverage(JNIEnv * env,
+    jobject obj, jlong jrender_data, jfloat sampleCoverage);
+
+JNIEXPORT jfloat JNICALL
+Java_org_gearvrf_NativeRenderData_getSampleCoverage(JNIEnv * env,
+        jobject obj, jlong jrender_data);
+
+JNIEXPORT void JNICALL
+Java_org_gearvrf_NativeRenderData_setInvertCoverageMask(JNIEnv * env,
+    jobject obj, jlong jrender_data, jboolean invertCoverageMask);
+
+JNIEXPORT jboolean JNICALL
+Java_org_gearvrf_NativeRenderData_getInvertCoverageMask(JNIEnv * env,
+        jobject obj, jlong jrender_data);
 
 JNIEXPORT jint JNICALL
 Java_org_gearvrf_NativeRenderData_getDrawMode(
@@ -159,6 +191,20 @@ Java_org_gearvrf_NativeRenderData_disableLight(JNIEnv * env,
     jobject obj, jlong jrender_data) {
 RenderData* render_data = reinterpret_cast<RenderData*>(jrender_data);
 render_data->disable_light();
+}
+
+JNIEXPORT void JNICALL
+Java_org_gearvrf_NativeRenderData_enableLightMap(JNIEnv * env,
+    jobject obj, jlong jrender_data) {
+RenderData* render_data = reinterpret_cast<RenderData*>(jrender_data);
+render_data->enable_lightmap();
+}
+
+JNIEXPORT void JNICALL
+Java_org_gearvrf_NativeRenderData_disableLightMap(JNIEnv * env,
+    jobject obj, jlong jrender_data) {
+RenderData* render_data = reinterpret_cast<RenderData*>(jrender_data);
+render_data->disable_lightmap();
 }
 
 JNIEXPORT jint JNICALL
@@ -257,6 +303,48 @@ Java_org_gearvrf_NativeRenderData_setAlphaBlend(JNIEnv * env,
     jobject obj, jlong jrender_data, jboolean alpha_blend) {
 RenderData* render_data = reinterpret_cast<RenderData*>(jrender_data);
 render_data->set_alpha_blend(static_cast<bool>(alpha_blend));
+}
+
+JNIEXPORT jboolean JNICALL
+Java_org_gearvrf_NativeRenderData_getAlphaToCoverage(JNIEnv * env,
+    jobject obj, jlong jrender_data) {
+RenderData* render_data = reinterpret_cast<RenderData*>(jrender_data);
+return static_cast<jboolean>(render_data->alpha_to_coverage());
+}
+
+JNIEXPORT void JNICALL
+Java_org_gearvrf_NativeRenderData_setAlphaToCoverage(JNIEnv * env,
+    jobject obj, jlong jrender_data, jboolean alphaToCoverage) {
+RenderData* render_data = reinterpret_cast<RenderData*>(jrender_data);
+render_data->set_alpha_to_coverage(static_cast<bool>(alphaToCoverage));
+}
+
+JNIEXPORT void JNICALL
+Java_org_gearvrf_NativeRenderData_setSampleCoverage(JNIEnv * env,
+    jobject obj, jlong jrender_data, jfloat sampleCoverage) {
+RenderData* render_data = reinterpret_cast<RenderData*>(jrender_data);
+render_data->set_sample_coverage(static_cast<float>(sampleCoverage));
+}
+
+JNIEXPORT jfloat JNICALL
+Java_org_gearvrf_NativeRenderData_getSampleCoverage(JNIEnv * env,
+    jobject obj, jlong jrender_data) {
+RenderData* render_data = reinterpret_cast<RenderData*>(jrender_data);
+return static_cast<jfloat>(render_data->sample_coverage());
+}
+
+JNIEXPORT void JNICALL
+Java_org_gearvrf_NativeRenderData_setInvertCoverageMask(JNIEnv * env,
+    jobject obj, jlong jrender_data, jboolean invertCoverageMask) {
+RenderData* render_data = reinterpret_cast<RenderData*>(jrender_data);
+render_data->set_invert_coverage_mask(static_cast<bool>(invertCoverageMask));
+}
+
+JNIEXPORT jboolean JNICALL
+Java_org_gearvrf_NativeRenderData_getInvertCoverageMask(JNIEnv * env,
+    jobject obj, jlong jrender_data) {
+RenderData* render_data = reinterpret_cast<RenderData*>(jrender_data);
+return static_cast<jboolean>(render_data->invert_coverage_mask());
 }
 
 JNIEXPORT void JNICALL

@@ -20,11 +20,11 @@ import java.util.Collections;
 import java.util.List;
 
 import org.gearvrf.GVRRenderData.GVRRenderMaskBit;
-import org.gearvrf.utility.Log;
 import org.gearvrf.debug.GVRConsole;
+import org.gearvrf.utility.Log;
 
 /** The scene graph */
-public class GVRScene extends GVRHybridObject {
+public class GVRScene extends GVRHybridObject implements PrettyPrint {
     @SuppressWarnings("unused")
     private static final String TAG = Log.tag(GVRScene.class);
 
@@ -86,6 +86,22 @@ public class GVRScene extends GVRHybridObject {
     public void removeSceneObject(GVRSceneObject sceneObject) {
         mSceneObjects.remove(sceneObject);
         NativeScene.removeSceneObject(getNative(), sceneObject.getNative());
+    }
+
+    /**
+     * Remove all scene objects.
+     */
+    public void removeAllSceneObjects() {
+        mSceneObjects.clear();
+        NativeScene.removeAllSceneObjects(getNative());
+    }
+
+    /**
+     * Clears the scene and resets it to initial state. Currently, it only
+     * removes all scene objects.
+     */
+    public void clear() {
+        removeAllSceneObjects();
     }
 
     /**
@@ -278,8 +294,11 @@ public class GVRScene extends GVRHybridObject {
             mStatsConsole.writeLine("Draw Calls: %d", numberDrawCalls);
             mStatsConsole.writeLine("Triangles: %d", numberTriangles);
 
-            if (mStatMessage.length() > 0)
-                mStatsConsole.writeLine("%s", mStatMessage.toString());
+            if (mStatMessage.length() > 0) {
+                String lines[] = mStatMessage.toString().split(System.lineSeparator());
+                for (String line : lines)
+                    mStatsConsole.writeLine("%s", line);
+            }
         }
     }
 
@@ -303,14 +322,131 @@ public class GVRScene extends GVRHybridObject {
     public void killStatMessage() {
         mStatMessage.delete(0, mStatMessage.length());
     }
+
+    /**
+     * Exports the scene to the given file path at some
+     * of the following supported formats:
+     *
+     *     Collada ( .dae )
+     *     Wavefront Object ( .obj )
+     *     Stereolithography ( .stl )
+     *     Stanford Polygon Library ( .ply )
+     *
+     * The current supported formats are the same supported
+     * by Assimp library. It will export according to file's
+     * extension.
+     *
+     * @param filepath Absolute file path to export the scene.
+     */
+    public void export(String filepath) {
+        NativeScene.exportToFile(getNative(), filepath);
+    }
+
+    private GVRDirectionalLight mDirectionalLight;
+
+    public void setDirectionalLight(GVRDirectionalLight light) {
+        mDirectionalLight = light;
+
+        if (light != null) {
+            NativeScene.attachDirectionalLight(getNative(), light.getNative());
+        } else {
+            NativeScene.attachDirectionalLight(getNative(), 0);
+        }
+    }
+
+    /**
+     * Prints the {@link GVRScene} object with indentation.
+     *
+     * @param sb
+     *         The {@code StringBuffer} object to receive the output.
+     *
+     * @param indent
+     *         Size of indentation in number of spaces.
+     */
+    @Override
+    public void prettyPrint(StringBuffer sb, int indent) {
+        sb.append(Log.getSpaces(indent));
+        sb.append(getClass().getSimpleName());
+        sb.append(System.lineSeparator());
+
+        sb.append(Log.getSpaces(indent + 2));
+        if (mMainCameraRig == null) {
+            sb.append("MainCameraRig: null");
+            sb.append(System.lineSeparator());
+        } else {
+            sb.append("MainCameraRig:");
+            sb.append(System.lineSeparator());
+            mMainCameraRig.prettyPrint(sb, indent + 4);
+        }
+
+        // Show all scene objects
+        for (GVRSceneObject child : mSceneObjects) {
+            child.prettyPrint(sb, indent + 2);
+        }
+    }
+
+    /**
+     * Apply the light map texture to the scene.
+     *
+     * @param texture Texture atlas with the baked light map of the scene.
+     */
+    public void applyLightMapTexture(GVRTexture texture) {
+        applyTextureAtlas("lightmap", texture, GVRMaterial.GVRShaderType.LightMap.ID);
+    }
+
+    /**
+     * Apply the texture atlas to the scene.
+     *
+     * @param key Name of the texture. Common texture names are "main", "lightmap", etc.
+     * @param texture The texture atlas
+     * @param shaderId The shader to render the texture atlas.
+     */
+    public void applyTextureAtlas(String key, GVRTexture texture, GVRMaterialShaderId shaderId) {
+        if (!texture.isAtlasedTexture()) {
+            Log.w(TAG, "Invalid texture atlas to the scene!");
+            return;
+        }
+
+        List<GVRAtlasInformation> atlasInfoList = texture.getAtlasInformation();
+
+        for (GVRAtlasInformation atlasInfo: atlasInfoList) {
+            GVRSceneObject sceneObject = getSceneObjectByName(atlasInfo.getName());
+
+            if (sceneObject == null || sceneObject.getRenderData() == null) {
+                Log.w(TAG, "Null render data or scene object " + atlasInfo.getName()
+                        + " not found to apply texture atlas.");
+                continue;
+            }
+
+            if (shaderId == GVRMaterial.GVRShaderType.LightMap.ID
+                    && !sceneObject.getRenderData().isLightMapEnabled()) {
+                // TODO: Add support to enable and disable light map at run time.
+                continue;
+                    }
+
+            sceneObject.getRenderData().getMaterial().setShaderType(shaderId);
+            sceneObject.getRenderData().getMaterial().setTexture(key + "_texture", texture);
+            sceneObject.getRenderData().getMaterial().setTextureAtlasInfo(key, atlasInfo);
+        }
+    }
+
+    @Override
+    public String toString() {
+        StringBuffer sb = new StringBuffer();
+        prettyPrint(sb, 0);
+        return sb.toString();
+    }
 }
 
 class NativeScene {
+
     static native long ctor();
 
     static native void addSceneObject(long scene, long sceneObject);
 
     static native void removeSceneObject(long scene, long sceneObject);
+
+    static native void removeAllSceneObjects(long scene);
 
     public static native void setFrustumCulling(long scene, boolean flag);
 
@@ -323,4 +459,8 @@ class NativeScene {
     public static native int getNumberDrawCalls(long scene);
 
     public static native int getNumberTriangles(long scene);
+
+    public static native void exportToFile(long scene, String file_path);
+
+    static native void attachDirectionalLight(long scene, long light);
 }

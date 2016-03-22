@@ -20,6 +20,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.gearvrf.io.GVRInputManager;
+
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -27,12 +29,15 @@ import android.util.SparseArray;
 
 /**
  * Create an instance of this class to receive {@link SensorEvent}s whenever an
- * input device interacts with a {@link GVRSceneObject}.
- * 
+ * input device interacts with a {@link GVRSceneObject}. <p>
+ *
  * Note that to successfully receive {@link SensorEvent}s for an object make
- * sure that the sensor is enabled and a valid {@link SensorEventListener} is
- * attached.
- * 
+ * sure that the sensor is enabled and a valid {@link ISensorEvents} is
+ * attached. <p>
+ *
+ * To attach a {@link ISensorEvents}, set the sensor to the object (e.g., {@link GVRSceneObject}),
+ * use {@link GVRSceneObject#getEventReceiver()} to get the {@link GVREventReceiver}, and then
+ * use {@link GVREventReceiver#addListener(IEvents)} to add the {@link ISensorEvents}. <p>
  */
 public class GVRBaseSensor {
     private static final String TAG = GVRBaseSensor.class.getSimpleName();
@@ -40,13 +45,12 @@ public class GVRBaseSensor {
     private boolean enabled = true;
     private ListenerDelegate listener;
     private SparseArray<ControllerData> controllerData;
+    protected GVRContext gvrContext;
+    protected IEventReceiver owner;
 
-    public GVRBaseSensor() {
-        this(null);
-    }
-
-    public GVRBaseSensor(SensorEventListener listener) {
-        this.listener = new ListenerDelegate(listener);
+    public GVRBaseSensor(GVRContext gvrContext) {
+        this.gvrContext = gvrContext;
+        this.listener = new ListenerDelegate();
         controllerData = new SparseArray<GVRBaseSensor.ControllerData>();
     }
 
@@ -122,18 +126,6 @@ public class GVRBaseSensor {
     }
 
     /**
-     * Register a listener to receive updates about objects tagged to this
-     * sensor.
-     * 
-     * Note that the method calls happen on the UI Thread.
-     * 
-     * @param listener
-     */
-    public void registerSensorEventListener(SensorEventListener listener) {
-        this.listener = new ListenerDelegate(listener);
-    }
-
-    /**
      * Use this method to disable the sensor.
      * 
      * Does not affect the sensor if already disabled.
@@ -161,17 +153,44 @@ public class GVRBaseSensor {
         return enabled;
     }
 
-    private static class ListenerDelegate {
-        private final SensorEventListener sensorEventListener;
+    /**
+     * Gets the owner of the sensor. The owner of the sensor can receive
+     * events from the sensor.
+     *
+     * @return The owner object.
+     */
+    protected IEventReceiver getOwner() {
+        return owner;
+    }
+
+    /**
+     * Sets the owner of the sensor. The owner of the sensor can receive
+     * events from the sensor, and must implement the interface {@link IEventReceiver}.
+     *
+     * @param owner The owner object of the sensor.
+     */
+    protected void setOwner(IEventReceiver owner) {
+        this.owner = owner;
+    }
+
+    private class ListenerDelegate {
         private final Handler mainThreadHandler;
 
-        public ListenerDelegate(SensorEventListener listener) {
-            this.sensorEventListener = listener;
+        public ListenerDelegate() {
             mainThreadHandler = new Handler(Looper.getMainLooper()) {
                 @Override
                 public void handleMessage(Message msg) {
                     SensorEvent event = (SensorEvent) msg.obj;
-                    sensorEventListener.onSensorEvent(event);
+
+                    // Sends the onSensorEvent event to the owner of the sensor
+                    // Make a copy for consistency. No need to use a mutex here.
+                    final IEventReceiver ownerCopy = owner;
+                    if (ownerCopy != null) {
+                        GVREventManager eventManager = gvrContext.getEventManager();
+                        eventManager.sendEvent(ownerCopy,
+                                ISensorEvents.class, "onSensorEvent", event);
+                    }
+
                     event.recycle();
                 }
             };

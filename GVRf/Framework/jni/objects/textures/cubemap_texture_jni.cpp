@@ -18,12 +18,10 @@
  ***************************************************************************/
 
 #include "cubemap_texture.h"
-#include "png_loader.h"
 #include "util/gvr_jni.h"
 #include "util/gvr_java_stack_trace.h"
 #include "android/asset_manager_jni.h"
 
-#include <png.h>
 
 namespace gvr {
 extern "C" {
@@ -31,7 +29,7 @@ JNIEXPORT jlong JNICALL
 Java_org_gearvrf_NativeCubemapTexture_bitmapArrayConstructor(JNIEnv * env,
         jobject obj, jobjectArray bitmapArray, jintArray jtexture_parameters);
 }
-;
+
 
 JNIEXPORT jlong JNICALL
 Java_org_gearvrf_NativeCubemapTexture_bitmapArrayConstructor(JNIEnv * env,
