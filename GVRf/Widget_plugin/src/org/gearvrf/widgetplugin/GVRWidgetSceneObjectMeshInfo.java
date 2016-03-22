@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-package org.gearvrf.plugins.widget;
+package org.gearvrf.widgetplugin;
 
 /**
  * GVRWidgetSceneObjectMeshInfo provides way to create GVRWidgetSceneObject

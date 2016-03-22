@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-package org.gearvrf.plugins.widget;
+package org.gearvrf.widgetplugin;
 
 import java.lang.reflect.Method;
 import java.util.Objects;
@@ -23,8 +23,7 @@ import javax.microedition.khronos.egl.EGLContext;
 import org.gearvrf.GVRActivity;
 import org.gearvrf.GVRSceneObject;
 import org.gearvrf.GVRScript;
-import org.gearvrf.plugins.GVRPlugin;
-import org.gearvrf.scene_objects.GVRWidgetSceneObject;
+import org.gearvrf.plugin.GVRPlugin;
 
 import android.annotation.TargetApi;
 import android.app.Activity;

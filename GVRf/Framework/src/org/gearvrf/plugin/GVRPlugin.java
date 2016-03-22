@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-package org.gearvrf.plugins;
+package org.gearvrf.plugin;
 
 import java.util.Objects;
 

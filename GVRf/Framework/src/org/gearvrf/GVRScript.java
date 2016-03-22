@@ -19,7 +19,7 @@ import javax.microedition.khronos.egl.EGLContext;
 
 import org.gearvrf.animation.GVRAnimation;
 
-import org.gearvrf.plugins.GVRPlugin;
+import org.gearvrf.plugin.GVRPlugin;
 
 import org.gearvrf.script.IScriptable;
 

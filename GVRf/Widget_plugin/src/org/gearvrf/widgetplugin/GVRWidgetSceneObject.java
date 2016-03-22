@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-package org.gearvrf.scene_objects;
+package org.gearvrf.widgetplugin;
 
 import org.gearvrf.GVRContext;
 import org.gearvrf.GVRExternalTexture;
@@ -24,7 +24,6 @@ import org.gearvrf.GVRSceneObject;
 import org.gearvrf.GVRSharedTexture;
 import org.gearvrf.GVRTexture;
 import org.gearvrf.GVRMaterial.GVRShaderType;
-import org.gearvrf.plugins.widget.GVRWidgetSceneObjectMeshInfo;
 import org.gearvrf.scene_objects.view.GVRView;
 
 import android.graphics.SurfaceTexture;

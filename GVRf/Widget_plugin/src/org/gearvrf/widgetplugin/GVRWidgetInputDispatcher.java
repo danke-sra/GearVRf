@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 
-package org.gearvrf.plugins.widget;
+package org.gearvrf.widgetplugin;
 
 import org.gearvrf.GVRSceneObject;
-import org.gearvrf.scene_objects.GVRWidgetSceneObject;
+
 
 import android.content.Context;
 import android.util.Log;
