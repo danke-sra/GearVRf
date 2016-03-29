@@ -18,6 +18,7 @@ package org.gearvrf.widgetplugin;
 import java.lang.reflect.Method;
 import java.util.Objects;
 
+import javax.microedition.khronos.egl.EGL10;
 import javax.microedition.khronos.egl.EGLContext;
 
 import org.gearvrf.GVRActivity;
@@ -543,9 +544,15 @@ public class GVRWidgetPluginActivity extends GVRActivity implements
     }
 
     @Override
-    public void init(Objects... args) {
+    public void init(Object... args) {      
         // TODO Auto-generated method stub
-
+        mScript.setEGLContext(((EGL10) EGLContext.getEGL())
+                .eglGetCurrentContext());
+        syncNotify();        
+        while (!isInitialised()) {
+           syncWait();
+        }
+        
     }
 
     @Override
@@ -605,7 +612,7 @@ public class GVRWidgetPluginActivity extends GVRActivity implements
 
     public void setCurrentScript(GVRScript script) {
         mScript = script;
-        mScript.setCurrentPlugin(this);
+        mScript.addPlugin(this);
     }
 
     public void setPickedObject(GVRSceneObject obj) {

@@ -15,7 +15,7 @@
 
 package org.gearvrf.plugin;
 
-import java.util.Objects;
+
 
 import android.os.Bundle;
 
@@ -24,7 +24,7 @@ import android.os.Bundle;
  */
 public interface GVRPlugin {
 
-    void init(Objects... args);
+    void init(Object... args);
 
     void destroy();
 
