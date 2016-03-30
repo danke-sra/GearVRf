@@ -20,6 +20,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.gearvrf.scene_objects.GVRViewSceneObject;
 import org.gearvrf.scene_objects.view.GVRView;
+import org.gearvrf.script.IScriptable;
 import org.gearvrf.utility.DockEventReceiver;
 import org.gearvrf.utility.Log;
 import org.gearvrf.utility.VrAppSettings;
@@ -44,7 +45,7 @@ import android.view.WindowManager;
  * of your scene graph. {@code GVRActivity} also gives GVRF a full-screen window
  * in landscape orientation with no title bar.
  */
-public class GVRActivity extends Activity {
+public class GVRActivity extends Activity implements IEventReceiver, IScriptable {
 
     private static final String TAG = Log.tag(GVRActivity.class);
 
@@ -68,6 +69,12 @@ public class GVRActivity extends Activity {
     private ViewGroup mRenderableViewGroup = null;
     private GVRActivityNative mActivityNative;
     private boolean mPaused = true;
+
+    // Send to listeners and scripts but not this object itself
+    private static final int SEND_EVENT_MASK =
+            GVREventManager.SEND_MASK_ALL & ~GVREventManager.SEND_MASK_OBJECT;
+
+    private GVREventReceiver mEventReceiver = new GVREventReceiver(this);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -119,6 +126,12 @@ public class GVRActivity extends Activity {
         mPaused = true;
         if (mViewManager != null) {
             mViewManager.onPause();
+
+            mViewManager.getEventManager().sendEventWithMask(
+                    SEND_EVENT_MASK,
+                    this,
+                    IActivityEvents.class,
+                    "onPause");
         }
         if (null != mDockEventReceiver) {
             mDockEventReceiver.stop();
@@ -137,6 +150,12 @@ public class GVRActivity extends Activity {
         super.onResume();
         if (mViewManager != null) {
             mViewManager.onResume();
+
+            mViewManager.getEventManager().sendEventWithMask(
+                    SEND_EVENT_MASK,
+                    this,
+                    IActivityEvents.class,
+                    "onResume");
         }
         if (null != mDockEventReceiver) {
             mDockEventReceiver.start();
@@ -151,6 +170,12 @@ public class GVRActivity extends Activity {
         android.util.Log.i(TAG, "onDestroy " + Integer.toHexString(hashCode()));
         if (mViewManager != null) {
             mViewManager.onDestroy();
+
+            mViewManager.getEventManager().sendEventWithMask(
+                    SEND_EVENT_MASK,
+                    this,
+                    IActivityEvents.class,
+                    "onDestroy");
         }
         mActivityNative.onDestroy();
         super.onDestroy();
@@ -191,6 +216,12 @@ public class GVRActivity extends Activity {
                 mViewManager = new GVRMonoscopicViewManager(this, gvrScript,
                         xmlParser);
             }
+            mViewManager.getEventManager().sendEventWithMask(
+                    SEND_EVENT_MASK,
+                    this,
+                    IActivityEvents.class,
+                    "onSetScript", gvrScript);
+
             if (null != mActivityHandler) {
                 mActivityHandler.onSetScript();
             }
@@ -340,6 +371,11 @@ public class GVRActivity extends Activity {
 
     public GVRContext getGVRContext() {
         return mViewManager;
+    }
+
+    @Override
+    public GVREventReceiver getEventReceiver() {
+        return mEventReceiver;
     }
 
     private boolean mIsDocked = false;
