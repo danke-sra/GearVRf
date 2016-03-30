@@ -17,8 +17,6 @@ package org.gearvrf;
 
 import java.util.ArrayList;
 
-import javax.microedition.khronos.egl.EGLContext;
-
 import org.gearvrf.animation.GVRAnimation;
 
 import org.gearvrf.plugin.GVRPlugin;
@@ -135,8 +133,7 @@ public abstract class GVRScript implements IScriptEvents, IScriptable, IEventRec
      * splash screen behavior
      */
 
-    private GVRViewManager mViewManager;
-    private EGLContext mEglContext;
+    private GVRViewManager mViewManager;    
     private ArrayList<GVRPlugin> mPlugins;
 
     /**
@@ -324,14 +321,6 @@ public abstract class GVRScript implements IScriptEvents, IScriptable, IEventRec
 
     public ArrayList<GVRPlugin> getPlugins() {
         return mPlugins;
-    }
-
-    public EGLContext getEGLContext() {
-        return mEglContext;
-    }
-
-    public void setEGLContext(EGLContext context) {
-        mEglContext = context;
-    }
+    } 
 
 }

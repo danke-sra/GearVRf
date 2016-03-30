@@ -109,6 +109,7 @@ public class GVRWidgetPluginActivity extends GVRActivity implements
     private boolean mIsWaitingForAudio = false;
     protected int mFBOTextureId = 0;
     private Object mSync = new Object();
+    private EGLContext mEGLContext;
 
     /**
      * This method has to be called in the {@link Activity#onCreate(Bundle)}
@@ -547,10 +548,10 @@ public class GVRWidgetPluginActivity extends GVRActivity implements
     }
 
     @Override
-    public void init(Object... args) {      
-        // TODO Auto-generated method stub
-        mScript.setEGLContext(((EGL10) EGLContext.getEGL())
-                .eglGetCurrentContext());
+    public void init(Object... args) {     
+        // TODO Auto-generated method stub       
+        mEGLContext = ((EGL10) EGLContext.getEGL())
+                .eglGetCurrentContext();
         syncNotify();        
         while (!isInitialised()) {
            syncWait();
@@ -634,7 +635,7 @@ public class GVRWidgetPluginActivity extends GVRActivity implements
             public void run() {
                 synchronized (mSync) {
                     try {
-                        while (mScript.getEGLContext() == null) {
+                        while (mEGLContext == null) {
                             mSync.wait();
                         }
                         runOnUiThread(new Runnable() {
@@ -656,7 +657,7 @@ public class GVRWidgetPluginActivity extends GVRActivity implements
 
     private void doResume(GVRWidget widget) {
         mWidgetView = (GLSurfaceView) initializeForView(widget,
-                new AndroidApplicationConfiguration(), mScript.getEGLContext());
+                new AndroidApplicationConfiguration(), mEGLContext);
 
         addContentView(mWidgetView, createLayoutParams());
         Gdx.app = this;
