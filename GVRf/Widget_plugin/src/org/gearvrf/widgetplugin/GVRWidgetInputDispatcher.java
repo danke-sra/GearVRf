@@ -67,7 +67,7 @@ public class GVRWidgetInputDispatcher {
 
     public boolean dispatchEvent(MotionEvent event, View view) {
 
-        if (mPickedObject == null)
+        if (mPickedObject == null || view == null)
             return false;
 
         getCoordinates(event, view, mPickedObject.getmeshInfo());

@@ -186,6 +186,7 @@ public class GVRWidgetPluginActivity extends GVRActivity implements
         // throw new GdxRuntimeException("LibGDX requires Android API Level " +
         // MINIMUM_SDK + " or later.");
         // }
+        
         mGraphics = new AndroidGraphics(
                 this,
                 config,
@@ -193,7 +194,7 @@ public class GVRWidgetPluginActivity extends GVRActivity implements
                         : config.resolutionStrategy, sharedcontext);
 
         mInputDispatcher.setInput(AndroidInputFactory.newAndroidInput(this,
-                this, mGraphics.getView(), config));
+                this, mGraphics.getView(), config));        
         mAudio = new AndroidAudio(this, config);
         this.getFilesDir(); // workaround for Android bug #10515463
         mFiles = new AndroidFiles(this.getAssets(), this.getFilesDir()
@@ -336,6 +337,7 @@ public class GVRWidgetPluginActivity extends GVRActivity implements
 
     @Override
     protected void onPause() {
+        if(mGraphics != null){
         boolean isContinuous = mGraphics.isContinuousRendering();
         boolean isContinuousEnforced = AndroidGraphics.enforceContinuousRendering;
 
@@ -358,6 +360,7 @@ public class GVRWidgetPluginActivity extends GVRActivity implements
         mGraphics.setContinuousRendering(isContinuous);
 
         mGraphics.onPauseGLSurfaceView();
+        }
 
         super.onPause();
     }
@@ -682,12 +685,12 @@ public class GVRWidgetPluginActivity extends GVRActivity implements
     }
 
     @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        if (mWidgetView != null) {
-            mInputDispatcher.dispatchEvent(event, mWidgetView);
-            return super.onTouchEvent(event);
-        }
-        return false;
+    public boolean dispatchTouchEvent(MotionEvent event) {         
+        
+        boolean handled = mInputDispatcher.dispatchEvent(event, mWidgetView);       
+        if(!handled)
+            return super.dispatchTouchEvent(event);
+        return true;
     }
 
     @Override
