@@ -117,13 +117,11 @@ public class GVREventManager {
         // Set to true if an event is handled.
         boolean handledSuccessful = false;
 
+        // Verify the event name and parameters (cached)
+        Method method = findHandlerMethod(target, eventsClass, eventName, params);
         if ((sendMask & SEND_MASK_OBJECT) != 0) {
-            // Check if the target directly handles the event by implementing the
-            // eventsClass interface.
-            Method method = findHandlerMethod(target, eventsClass, eventName, params);
-
-            if (method != null) {
-                // Try invoking the method in target
+            // Invoke the method if the target implements the interface
+            if (eventsClass.isInstance(target)) {
                 invokeMethod(target, method, params);
                 handledSuccessful = true;
             }
@@ -163,25 +161,27 @@ public class GVREventManager {
     }
 
     /*
-     * Return the method in the target by signature. It throws if the method is not found.
+     * Return the method in eventsClass by checking the signature.
+     * RuntimeException is thrown if the event is not found in the eventsClass interface,
+     * or the parameter types don't match.
      */
     private Method findHandlerMethod(Object target, Class<? extends IEvents> eventsClass,
             String eventName, Object[] params) {
-        // Use cached method if available
+        // Use cached method if available. Note: future type checking is skipped here,
+        // it will be checked by JRE when the method is invoked.
         Method cachedMethod = getCachedMethod(target, eventName);
         if (cachedMethod != null) {
             return cachedMethod;
         }
 
-        // Check target event interface
-        if (!eventsClass.isInstance(target)) {
-            // The target object does not implement interface
-            return null;
-        }
-
+        // Check the event and params against the eventsClass interface object.
+        Method nameMatch = null;
+        Method signatureMatch = null;
         for (Method method : eventsClass.getMethods()) {
             // Match method name and event name
             if (method.getName().equals(eventName)) {
+                nameMatch = method;
+
                 // Check number of parameters
                 Class<?>[] types = method.getParameterTypes();
                 if (types.length != params.length)
@@ -199,14 +199,25 @@ public class GVREventManager {
                 }
 
                 if (foundMatchedMethod) {
-                    addCachedMethod(target, eventName, method);
-                    return method;
+                    signatureMatch = method;
+                    break;
                 }
             }
         }
 
-        // No matching method
-        return null;
+        // Error
+        if (nameMatch == null) {
+            throw new RuntimeException(String.format("The interface contains no method %s", eventName));
+        } else if (signatureMatch == null ){
+            throw new RuntimeException(String.format("The interface contains a method %s but "
+                    + "parameters don't match", eventName));
+        }
+
+        // Cache the method for the target, even if it doesn't implement the interface. This is
+        // to avoid always verifying the event.
+        addCachedMethod(target, eventName, signatureMatch);
+
+        return signatureMatch;
     }
 
     private Method getCachedMethod(Object target, String eventName) {
