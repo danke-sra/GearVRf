@@ -15,89 +15,39 @@
 
 package org.gearvrf.widgetViewer;
 
-import java.lang.reflect.Method;
-
+import org.gearvrf.GVRActivity;
 import org.gearvrf.GVRWidgetViewer.R;
-
-import org.gearvrf.plugins.widget.GVRWidgetPluginActivity;
-
+import org.gearvrf.plugins.widget.GVRWidgetPlugin;
 import org.gearvrf.util.VRTouchPadGestureDetector;
 import org.gearvrf.util.VRTouchPadGestureDetector.OnTouchPadGestureListener;
 import org.gearvrf.util.VRTouchPadGestureDetector.SwipeDirection;
 
-import android.annotation.TargetApi;
-import android.app.Activity;
 import android.app.ActionBar.LayoutParams;
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.Configuration;
-import android.database.DataSetObserver;
 import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.graphics.Matrix;
-import android.graphics.PixelFormat;
 import android.graphics.Point;
-import android.graphics.Rect;
 import android.net.Uri;
-import android.net.wifi.p2p.WifiP2pManager.ActionListener;
 import android.opengl.GLSurfaceView;
-import android.os.Build;
 import android.os.Bundle;
-import android.os.Debug;
 import android.os.Environment;
 import android.os.Handler;
-import android.util.DisplayMetrics;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
-import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
-import android.view.WindowManager;
-import android.webkit.WebView;
 import android.widget.ArrayAdapter;
-import android.widget.FrameLayout;
-import android.widget.ListAdapter;
 import android.widget.TextView;
 
-/*import com.badlogic.gdx.ApplicationListener;
- import com.badlogic.gdx.Audio;
- import com.badlogic.gdx.Files;
- import com.badlogic.gdx.Gdx;
- import com.badlogic.gdx.Graphics;
- import com.badlogic.gdx.LifecycleListener;
- import com.badlogic.gdx.Net;
- import com.badlogic.gdx.Preferences;
- import com.badlogic.gdx.Application.ApplicationType;
- import com.badlogic.gdx.backends.android.AndroidApplication;
- import com.badlogic.gdx.backends.android.AndroidApplicationBase;
- import com.badlogic.gdx.backends.android.AndroidApplicationConfiguration;
- import com.badlogic.gdx.backends.android.AndroidAudio;
- import com.badlogic.gdx.backends.android.AndroidClipboard;
- import com.badlogic.gdx.backends.android.AndroidEventListener;
- import com.badlogic.gdx.backends.android.AndroidFiles;
- import com.badlogic.gdx.backends.android.AndroidGraphics;
- import com.badlogic.gdx.backends.android.AndroidInput;
- import com.badlogic.gdx.backends.android.AndroidInputFactory;
- import com.badlogic.gdx.backends.android.AndroidNet;
- import com.badlogic.gdx.backends.android.AndroidPreferences;
- import com.badlogic.gdx.backends.android.surfaceview.FillResolutionStrategy;
- import com.badlogic.gdx.backends.android.surfaceview.GLSurfaceView20;
- import com.badlogic.gdx.utils.Array;
- import com.badlogic.gdx.utils.Clipboard;
- import com.badlogic.gdx.utils.GdxNativesLoader;
- import com.badlogic.gdx.utils.GdxRuntimeException;
- import com.badlogicgames.superjumper.SuperJumper;*/
-
-import org.gearvrf.GVRActivity;
-
-public class GVRWidgetViewer extends GVRWidgetPluginActivity implements
+public class GVRWidgetViewer extends GVRActivity implements
         OnTouchPadGestureListener {
+
+	private GVRWidgetPlugin mPlugin = new GVRWidgetPlugin(this);
 
     private static final int BUTTON_INTERVAL = 500;
     private static final int TAP_INTERVAL = 300;
@@ -127,8 +77,7 @@ public class GVRWidgetViewer extends GVRWidgetPluginActivity implements
         // getWindowManager().getDefaultDisplay().getSize(size);
         // width = size.x;
         // height = size.y;
-        mViewWidth = 500;
-        mViewHeight = 500;
+        mPlugin.setViewSize(500, 500);
         // getWindowManager().getDefaultDisplay().getMetrics(null);
         mDetector = new VRTouchPadGestureDetector(this);
         scene2d = WidgetView.getInstance();
@@ -168,7 +117,7 @@ public class GVRWidgetViewer extends GVRWidgetPluginActivity implements
         // webview.measure(500, 500);
         webview.setLayoutMode(LayoutParams.WRAP_CONTENT);
         widget = new MyGdxWidget();
-        initializeWidget(widget);
+        mPlugin.initializeWidget(widget);
 
         // game = new SuperJumper();
         // mView =
@@ -177,9 +126,9 @@ public class GVRWidgetViewer extends GVRWidgetPluginActivity implements
         // webview = (GLWebView) view.findViewById(R.id.glWebView);
         // webview.setLayerType(View.LAYER_TYPE_HARDWARE, null);
         Bitmap b = null;
-        mScript = new ViewerScript(this,/* graphics.getView() */webview,
+        mScript = new ViewerScript(mPlugin,/* graphics.getView() */webview,
                 scene2d);
-        setCurrentScript(mScript);
+        mPlugin.setCurrentScript(mScript);
         widget.mScript = mScript;
 
         webview.setViewToGLRenderer(mScript);
@@ -284,7 +233,7 @@ public class GVRWidgetViewer extends GVRWidgetPluginActivity implements
          * 
          * getInput().onTouch(getGraphics().getView(),event); }
          */
-        if (getWidgetView() == null)
+        if (mPlugin.getWidgetView() == null)
             return false;
         if (mScript.objectpointed) {
             float x = 0, dx = 0, y = 0, dy = 0.0f;

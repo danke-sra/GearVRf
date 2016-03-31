@@ -33,7 +33,7 @@ import org.gearvrf.GVRSceneObject;
 import org.gearvrf.GVRScript;
 import org.gearvrf.GVRSharedTexture;
 import org.gearvrf.GVRTexture;
-import org.gearvrf.plugins.widget.GVRWidgetPluginActivity;
+import org.gearvrf.plugins.widget.GVRWidgetPlugin;
 import org.gearvrf.plugins.widget.GVRWidgetSceneObject;
 import org.gearvrf.plugins.widget.GVRWidgetSceneObjectMeshInfo;
 
@@ -123,7 +123,8 @@ public class ViewerScript extends GVRScript {
 
     public GVRSceneObject[] Objects = new GVRSceneObject[THUMBNAIL_NUM];
 
-    private GVRWidgetPluginActivity mActivity;
+    private GVRWidgetPlugin mPlugin;
+    private GVRActivity mActivity; 
     private GLWebView view = null;
 
     private Surface mSurface;
@@ -151,8 +152,9 @@ public class ViewerScript extends GVRScript {
     public boolean mLookInside = false;
     public float zoomlevel = -2.0f;
 
-    ViewerScript(GVRActivity activity, View v, Bitmap b) {
-        mActivity = (GVRWidgetPluginActivity) activity;
+    ViewerScript(GVRWidgetPlugin plugin, View v, Bitmap b) {
+    	mPlugin = plugin;
+    	mActivity = plugin.getGVRActivity();
         view = (GLWebView) v;
         bb = b;
     }
@@ -697,7 +699,7 @@ public class ViewerScript extends GVRScript {
 
             // ((WebView) view).loadData("webview", "text/html", "utf-8");
             // view.setBackgroundColor(Color.CYAN);
-            mActivity.runOnUiThread(new Runnable() {
+            mPlugin.getGVRActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     // view.setWebViewClient(new WebViewClient());
@@ -765,7 +767,7 @@ public class ViewerScript extends GVRScript {
 
             // }
             Log.e("datta", "generating texture now=" + libGDxTexture);
-            texture = new GVRSharedTexture(gvrContext, mActivity.getTextureId());
+            texture = new GVRSharedTexture(gvrContext, mPlugin.getTextureId());
 
             /*
              * GLES20.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES,
@@ -797,11 +799,11 @@ public class ViewerScript extends GVRScript {
             info2.mBottomRightOfView = new int[] { 500, 500 };
             info2.mTopLeftOfView = new int[] { 251, 0 };*/
             widgetbuttonObject = new GVRWidgetSceneObject(mGVRContext,
-                    mActivity.getTextureId(), info, mActivity.getWidth(),
-                    mActivity.getHeight());
+            		mPlugin.getTextureId(), info, mPlugin.getWidth(),
+            		mPlugin.getHeight());
             widgetbuttonObject2 = new GVRWidgetSceneObject(mGVRContext,
-                    mActivity.getTextureId(), info2, mActivity.getWidth(),
-                    mActivity.getHeight());
+            		mPlugin.getTextureId(), info2, mPlugin.getWidth(),
+            		mPlugin.getHeight());
             GVRRenderData ldata = new GVRRenderData(mGVRContext);
             GVRRenderData ldata2 = new GVRRenderData(mGVRContext);
             // GVRMesh mesh21 = mGVRContext.loadMesh(new GVRAndroidResource(
@@ -1453,7 +1455,7 @@ public class ViewerScript extends GVRScript {
         if (/* SelectionMode && */pickedHolders.length > 0) {
             GVRSceneObject pickedObject = pickedHolders[0].getOwnerObject();
             coords = pickedObject.getEyePointeeHolder().getHit();
-            mActivity.setPickedObject(pickedObject);
+            mPlugin.setPickedObject(pickedObject);
             for (int i = 0; i < THUMBNAIL_NUM; ++i) {
                 if (ThumbnailObject[i].equals(pickedObject)) {
                     // ThumbnailSelected = i;

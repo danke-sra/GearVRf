@@ -147,7 +147,7 @@ class VrapiActivityHandler implements ActivityHandler {
         final int screenHeightPixels = Math.min(metrics.widthPixels, metrics.heightPixels);
 
         final SurfaceHolder holder = mSurfaceView.getHolder();
-        holder.setFormat(PixelFormat.TRANSLUCENT);
+        // holder.setFormat(PixelFormat.TRANSLUCENT);
 
         final VrAppSettings appSettings = mActivity.getAppSettings();
         final int framebufferHeight = appSettings.getFramebufferPixelsHigh();
