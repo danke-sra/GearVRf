@@ -192,7 +192,7 @@ public class GVREventManager {
                 boolean foundMatchedMethod = true;
                 for (Class<?> type : types) {
                     Object param = params[i++];
-                    if (!type.isInstance(param)) {
+                    if (!isAssignableWithAutoboxing(type, param)) {
                         foundMatchedMethod = false;
                         break;
                     }
@@ -218,6 +218,18 @@ public class GVREventManager {
         addCachedMethod(target, eventName, signatureMatch);
 
         return signatureMatch;
+    }
+
+    private boolean isAssignableWithAutoboxing(Class<?> type, Object value) {
+        if (type.isInstance(value))
+            return true;
+
+        // Check auto-boxing cases
+        if (type.isAssignableFrom(boolean.class) && Boolean.class.isInstance(value)) {
+            return true;
+        }
+
+        return false;
     }
 
     private Method getCachedMethod(Object target, String eventName) {
