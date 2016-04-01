@@ -19,8 +19,6 @@ import java.util.ArrayList;
 
 import org.gearvrf.animation.GVRAnimation;
 
-import org.gearvrf.plugin.GVRPlugin;
-
 import org.gearvrf.script.IScriptable;
 
 
@@ -142,8 +140,7 @@ public abstract class GVRScript implements IScriptEvents, IScriptable, IEventRec
      * splash screen behavior
      */
 
-    private GVRViewManager mViewManager;    
-    private ArrayList<GVRPlugin> mPlugins;
+    private GVRViewManager mViewManager;
 
     /**
      * Whether the splash screen should be displayed, and for how long.
@@ -319,17 +316,4 @@ public abstract class GVRScript implements IScriptEvents, IScriptable, IEventRec
         onSplashScreenCreated(splashScreen);
         return splashScreen;
     }
-
-    public void addPlugin(GVRPlugin plugin) {
-        if(mPlugins == null){
-            mPlugins = new ArrayList<GVRPlugin>();
-        }
-        mPlugins.add(plugin); 
-       
-    }
-
-    public ArrayList<GVRPlugin> getPlugins() {
-        return mPlugins;
-    } 
-
 }

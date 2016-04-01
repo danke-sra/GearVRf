@@ -353,6 +353,13 @@ public class GVRActivity extends Activity implements IEventReceiver, IScriptable
         if (handled == false) {
             handled = super.dispatchTouchEvent(event);// VrActivity's
         }
+
+        mViewManager.getEventManager().sendEventWithMask(
+                SEND_EVENT_MASK,
+                this,
+                IActivityEvents.class,
+                "dispatchTouchEvent", event);
+
         return handled;
     }
 

@@ -40,4 +40,6 @@ public interface IActivityEvents extends IEvents {
     void onActivityResult(int requestCode, int resultCode, Intent data);
 
     void onTouchEvent(MotionEvent event);
+
+    void dispatchTouchEvent(MotionEvent event);
 }

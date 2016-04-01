@@ -697,11 +697,6 @@ class GVRViewManager extends GVRContext implements RotationSensorListener {
             }
 
             try {
-
-                if (mScript.getPlugins() != null) {
-                    initPlugins();                   
-                  }                 
-               
                 GVRViewManager.this.getEventManager().sendEvent(
                         mScript, IScriptEvents.class,
                         "onEarlyInit", GVRViewManager.this);
@@ -709,7 +704,6 @@ class GVRViewManager extends GVRContext implements RotationSensorListener {
                 GVRViewManager.this.getEventManager().sendEvent(
                         mScript, IScriptEvents.class,
                         "onInit", GVRViewManager.this);
-
             } catch (Throwable t) {
                 t.printStackTrace();
                 mActivity.finish();
@@ -1002,14 +996,6 @@ class GVRViewManager extends GVRContext implements RotationSensorListener {
     @Override
     public GVRInputManager getInputManager() {
         return mInputManager;
-    }
-
-
-    private void initPlugins() {
-        for(int i = 0; i < mScript.getPlugins().size();i++){
-            mScript.getPlugins().get(i).init();
-        }
-       
     }
 
     @Override
